@@ -12,12 +12,12 @@ Projeto Spring Boot 4.1.1 em `backend/` (Maven Wrapper, Java 21, pacote `br.com.
 - Arquivos: `backend/pom.xml`, `backend/mvnw*`, `backend/src/main/resources/application.properties`, `ChallengefogoApplication.java`, `ChallengefogoApplicationTests.java`, `TestcontainersConfiguration.java`, `docker-compose.yml`, `.gitignore`.
 - Depende de: nada.
 
-## T2: Problem Details e tipos compartilhados
+## T2: Problem Details e tipos compartilhados ✅ (22/10/2026)
 
 `shared/web/GlobalExceptionHandler`, `shared/web/ProblemTypes` (`urn:fogo:problem:<erro>`), exceções base (`NotFoundException`, `ConflictException`, `BusinessRuleException`), `shared/domain/Location` (`@Embeddable`), enums `Agency` e `Region`.
 
-- [ ] Aceite: `MethodArgumentNotValidException` → `400` com a lista de campos inválidos; `NotFound` → `404`; `Conflict` → `409`; `BusinessRule` → `422`, todos com `type` URN.
-- [ ] Aceite: erro inesperado → `500` sem stack trace no corpo.
+- [x] Aceite: `MethodArgumentNotValidException` → `400` com a lista de campos inválidos; `NotFound` → `404`; `Conflict` → `409`; `BusinessRule` → `422`, todos com `type` URN.
+- [x] Aceite: erro inesperado → `500` sem stack trace no corpo.
 - Verificação: teste MockMvc com um controller de teste (`@WebMvcTest`) cobrindo os 5 casos; `./mvnw test`.
 - Arquivos: `shared/web/*`, `shared/domain/*`, teste do handler.
 - Depende de: T1.

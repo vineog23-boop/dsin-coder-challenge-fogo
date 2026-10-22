@@ -34,4 +34,6 @@ Desafio F.O.G.O. (DSIN Coder Challenge, Protocolo PROMETHEUS, etapa bônus). **P
 
 ## Handoff
 
-Agentes configurados com `/iniciar`. Specs da Parte 1 aprovadas. Plano em `.specs/plan-parte-1.md` (T1–T22, tarefas nos `tasks.md` de `setup`, `auth`, `equipment`, `agent`), aprovado. T1 concluído (backend Boot 4.1.1 + Postgres 17 na porta 5433). Próximo passo: `/fazer` T2.
+Agentes configurados com `/iniciar`. Specs da Parte 1 aprovadas. Plano em `.specs/plan-parte-1.md` (T1–T22, tarefas nos `tasks.md` de `setup`, `auth`, `equipment`, `agent`), aprovado. T1 e T2 concluídos (backend Boot 4.1.1 + Postgres 17 na porta 5433; `GlobalExceptionHandler` com Problem Details). Próximo passo: `/fazer` T3.
+
+**Atenção no T5:** o `GlobalExceptionHandler` tem `@ExceptionHandler(Exception.class)` → 500. `AccessDeniedException`/`AuthenticationException` lançadas dentro do controller (ex.: `@PreAuthorize`) cairiam nele; tratar as duas explicitamente (403/401 em Problem Details) ao configurar a segurança.
