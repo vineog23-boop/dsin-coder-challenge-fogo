@@ -32,18 +32,18 @@ Projeto Spring Boot 4.1.1 em `backend/` (Maven Wrapper, Java 21, pacote `br.com.
 - Arquivos: `frontend/package.json`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, `src/lib/api/client.ts`, `src/lib/api/client.test.ts`.
 - Depende de: nada.
 
-## T4: Projeto sobe com um comando
+## T4: Projeto sobe com um comando ✅ (22/10/2026)
 
 `backend/Dockerfile` (multi-stage, Temurin 21), `frontend/Dockerfile` (build + nginx com proxy de `/api`), compose com `db`, `backend` (perfil `demo`, espera o banco saudável) e `frontend`; `.env.example` com `JWT_SECRET` e as credenciais do banco.
 
-- [ ] Aceite: em clone limpo, `docker compose up --build` deixa o front em `http://localhost:3000`, e `/api/actuator/health` (ou endpoint equivalente) responde `UP` via nginx.
-- [ ] Aceite: funciona sem `.env` (valores padrão de desenvolvimento no compose), e `.env` está no `.gitignore`.
+- [x] Aceite: em clone limpo, `docker compose up --build` deixa o front em `http://localhost:3000`, e `/api/actuator/health` (ou endpoint equivalente) responde `UP` via nginx.
+- [x] Aceite: funciona sem `.env` (valores padrão de desenvolvimento no compose), e `.env` está no `.gitignore`.
 - Verificação: `docker compose down -v && docker compose up --build`; `curl`.
 - Arquivos: `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml`, `.env.example`.
 - Depende de: T1, T3.
 
 ## Checkpoint A
-- [ ] `./mvnw test`, `npm test`, `npm run build` verdes; `docker compose up --build` sobe tudo do zero.
+- [x] `./mvnw test`, `npm test`, `npm run build` verdes; `docker compose up --build` sobe tudo do zero.
 
 ## T22: README de entrega e verificação final
 

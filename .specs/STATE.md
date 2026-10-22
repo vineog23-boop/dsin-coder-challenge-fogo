@@ -34,8 +34,8 @@ Desafio F.O.G.O. (DSIN Coder Challenge, Protocolo PROMETHEUS, etapa bônus). **P
 
 ## Handoff
 
-Agentes configurados com `/iniciar`. Specs da Parte 1 aprovadas. Plano em `.specs/plan-parte-1.md` (T1–T22, tarefas nos `tasks.md` de `setup`, `auth`, `equipment`, `agent`), aprovado. T1, T2 e T3 concluídos (backend Boot 4.1.1 + Postgres 17 na porta 5433; `GlobalExceptionHandler` com Problem Details; front Vite + React 19 + React Router, rotas `/equipamentos` e `/agentes`, cliente `api()` em `src/lib/api/client.ts` que lança `ApiError` com o Problem Details). Próximo passo: `/fazer` T4.
+Agentes configurados com `/iniciar`. Specs da Parte 1 aprovadas. Plano em `.specs/plan-parte-1.md` (T1–T22, tarefas nos `tasks.md` de `setup`, `auth`, `equipment`, `agent`), aprovado. T1–T4 e Checkpoint A concluídos (backend Boot 4.1.1 + Postgres 17 na porta 5433; `GlobalExceptionHandler` com Problem Details; front Vite + React 19 + React Router, rotas `/equipamentos` e `/agentes`, cliente `api()` em `src/lib/api/client.ts` que lança `ApiError` com o Problem Details). T4: `docker compose up --build` sobe db, backend (perfil `demo`, sem porta no host) e front em `http://localhost:3000`; o nginx repassa `/api/` ao back e mapeia `/api/actuator/health` → `/actuator/health`. Imagem do back pula os testes (Testcontainers precisa de Docker). Próximo passo: `/fazer` T5.
 
-**Atenção no T4:** o health do back fica em `/actuator/health` (fora de `/api`); o nginx precisa expô-lo ou o aceite usa outro caminho. Não há Google Chrome na máquina (o MCP chrome-devtools falha); a conferência de front usou o Chromium do Playwright via script no scratchpad.
+**Navegador:** não há Google Chrome na máquina (o MCP chrome-devtools falha); a conferência de front usou o Chromium do Playwright via script no scratchpad.
 
 **Atenção no T5:** o `GlobalExceptionHandler` tem `@ExceptionHandler(Exception.class)` → 500. `AccessDeniedException`/`AuthenticationException` lançadas dentro do controller (ex.: `@PreAuthorize`) cairiam nele; tratar as duas explicitamente (403/401 em Problem Details) ao configurar a segurança.

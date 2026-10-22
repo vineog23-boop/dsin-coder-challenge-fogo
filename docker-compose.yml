@@ -15,5 +15,24 @@ services:
       timeout: 3s
       retries: 10
 
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      DB_URL: jdbc:postgresql://db:5432/fogo
+      DB_USERNAME: ${DB_USERNAME:-fogo}
+      DB_PASSWORD: ${DB_PASSWORD:-fogo}
+      JWT_SECRET: ${JWT_SECRET:-fogo-dev-secret-troque-em-producao-0123456789}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
 volumes:
   fogo-db:
