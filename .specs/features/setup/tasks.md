@@ -22,12 +22,12 @@ Projeto Spring Boot 4.1.1 em `backend/` (Maven Wrapper, Java 21, pacote `br.com.
 - Arquivos: `shared/web/*`, `shared/domain/*`, teste do handler.
 - Depende de: T1.
 
-## T3: Scaffold do front
+## T3: Scaffold do front ✅ (22/10/2026)
 
-`frontend/` com Vite + React + TypeScript, ESLint, Vitest, React Router. Layout com menu (Equipamentos, Agentes), páginas vazias e `src/lib/api/client.ts` (base `/api`, JSON, erro em Problem Details tipado). Proxy do Vite para `localhost:8080`.
+`frontend/` com Vite + React + TypeScript, oxlint (linter padrão do template atual do Vite, no lugar do ESLint), Vitest, React Router. Layout com menu (Equipamentos, Agentes), páginas vazias e `src/lib/api/client.ts` (base `/api`, JSON, erro em Problem Details tipado). Proxy do Vite para `localhost:8080`.
 
-- [ ] Aceite: `npm run lint`, `npm test` e `npm run build` passam.
-- [ ] Aceite: `npm run dev` abre o layout, e a navegação entre as páginas funciona (conferido no navegador em largura de celular e desktop).
+- [x] Aceite: `npm run lint`, `npm test` e `npm run build` passam.
+- [x] Aceite: `npm run dev` abre o layout, e a navegação entre as páginas funciona (conferido no navegador em largura de celular e desktop).
 - Verificação: os três comandos + DevTools.
 - Arquivos: `frontend/package.json`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, `src/lib/api/client.ts`, `src/lib/api/client.test.ts`.
 - Depende de: nada.
