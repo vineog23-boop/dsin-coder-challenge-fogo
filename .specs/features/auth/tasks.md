@@ -6,8 +6,8 @@ Spec: `spec.md`. Plano: `.specs/plan-parte-1.md`.
 
 `auth/application/TokenService` (emite e valida JWT HS256 com claim `role`, validade de 8 h, segredo de `JWT_SECRET`). `SecurityConfig` sem sessão: `/api/auth/login`, `/v3/api-docs/**`, `/swagger-ui/**` e health públicos; `GET` para os dois perfis; escrita só `MANAGER`, exceto `PATCH /api/agents/*/position`. `401`/`403` em Problem Details.
 
-- [ ] Aceite: token expirado ou com assinatura errada é recusado (teste unitário).
-- [ ] Aceite: `GET` sem token → `401`; `POST` com token `OPERATOR` → `403`; com `MANAGER` passa (MockMvc com controller de teste).
+- [x] Aceite: token expirado ou com assinatura errada é recusado (teste unitário).
+- [x] Aceite: `GET` sem token → `401`; `POST` com token `OPERATOR` → `403`; com `MANAGER` passa (MockMvc com controller de teste).
 - Verificação: `./mvnw test -Dtest='TokenServiceTest,SecurityConfigTest'`, depois `./mvnw test`.
 - Arquivos: `auth/application/TokenService.java`, `shared/security/SecurityConfig.java`, `shared/security/ProblemAuthenticationEntryPoint.java`, testes.
 - Depende de: T2.

@@ -12,6 +12,8 @@ public final class ProblemTypes {
     public static final URI NOT_FOUND = problem("not-found");
     public static final URI CONFLICT = problem("conflict");
     public static final URI BUSINESS_RULE = problem("business-rule");
+    public static final URI UNAUTHORIZED = problem("unauthorized");
+    public static final URI FORBIDDEN = problem("forbidden");
     public static final URI INTERNAL = problem("internal");
 
     private ProblemTypes() {

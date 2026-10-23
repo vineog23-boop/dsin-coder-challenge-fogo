@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -61,6 +63,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleBusinessRule(BusinessRuleException ex) {
         return problem(HttpStatus.UNPROCESSABLE_CONTENT, ProblemTypes.BUSINESS_RULE,
                 "Regra de negócio violada", ex.getMessage());
+    }
+
+    /** Mensagem fixa: não revela se o token faltou, expirou ou teve a assinatura adulterada. */
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthentication(AuthenticationException ex) {
+        return problem(HttpStatus.UNAUTHORIZED, ProblemTypes.UNAUTHORIZED, "Não autenticado",
+                "Faça login para acessar este recurso.");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
+        return problem(HttpStatus.FORBIDDEN, ProblemTypes.FORBIDDEN, "Acesso negado",
+                "Seu perfil não tem permissão para esta operação.");
     }
 
     /** A mensagem original fica só no log: pode carregar SQL, nomes internos ou dados sensíveis. */
