@@ -1,5 +1,6 @@
 package br.com.dsin.challengefogo.shared.web;
 
+import br.com.dsin.challengefogo.auth.application.InvalidCredentialsException;
 import br.com.dsin.challengefogo.shared.domain.BusinessRuleException;
 import br.com.dsin.challengefogo.shared.domain.ConflictException;
 import br.com.dsin.challengefogo.shared.domain.NotFoundException;
@@ -70,6 +71,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleAuthentication(AuthenticationException ex) {
         return problem(HttpStatus.UNAUTHORIZED, ProblemTypes.UNAUTHORIZED, "Não autenticado",
                 "Faça login para acessar este recurso.");
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
+        return problem(HttpStatus.UNAUTHORIZED, ProblemTypes.UNAUTHORIZED, "Não autenticado", ex.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)

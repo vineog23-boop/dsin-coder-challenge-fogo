@@ -16,10 +16,10 @@ Spec: `spec.md`. Plano: `.specs/plan-parte-1.md`.
 
 Migration `app_user` (`id`, `username` único, `password_hash`, `role`). `UserEntity`, `UserRepository`, `AuthService.login` (BCrypt), `AuthController` `POST /api/auth/login`. Seeder demo cria `gestor` e `operador` se não existirem.
 
-- [ ] Aceite: login correto devolve `accessToken`, `expiresIn`, `role`; usuário inexistente e senha errada devolvem o mesmo `401`.
-- [ ] Aceite: com o perfil `demo`, os dois usuários existem após subir a aplicação.
+- [x] Aceite: login correto devolve `accessToken`, `expiresIn`, `role`; usuário inexistente e senha errada devolvem o mesmo `401`.
+- [x] Aceite: com o perfil `demo`, os dois usuários existem após subir a aplicação.
 - Verificação: unitário de `AuthService` (mock do repository); MockMvc do controller; `./mvnw test`; `curl` no login com o compose.
-- Arquivos: `V2__create_app_user.sql`, `auth/persistence/UserEntity.java`, `auth/persistence/UserRepository.java`, `auth/application/AuthService.java`, `auth/web/AuthController.java` (+ DTOs), `shared/demo/DemoUserSeeder.java`.
+- Arquivos: `V1__create_app_user.sql`, `auth/persistence/UserEntity.java`, `auth/persistence/UserRepository.java`, `auth/application/AuthService.java`, `auth/web/AuthController.java` (+ DTOs), `shared/demo/DemoUserSeeder.java`.
 - Depende de: T5.
 
 ## T7: Front de login

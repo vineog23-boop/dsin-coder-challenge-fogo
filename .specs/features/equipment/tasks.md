@@ -9,7 +9,7 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 - [ ] Aceite: teste de integração (Testcontainers) salva e relê um equipamento de cada subclasse e um `AUTOMATED_GATE` só na tabela base.
 - [ ] Aceite: `ddl-auto=validate` sobe sem erro.
 - Verificação: `./mvnw test -Dtest=EquipmentRepositoryIT`, `./mvnw test`.
-- Arquivos: `V3__create_equipment.sql`, `equipment/domain/*` (enums), `equipment/persistence/*Entity.java`, `EquipmentRepository.java`, teste.
+- Arquivos: `V2__create_equipment.sql`, `equipment/domain/*` (enums), `equipment/persistence/*Entity.java`, `EquipmentRepository.java`, teste.
 - Depende de: T2.
 
 ## T9: Criar equipamento
