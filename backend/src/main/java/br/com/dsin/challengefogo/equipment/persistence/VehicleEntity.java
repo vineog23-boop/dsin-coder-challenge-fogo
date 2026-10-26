@@ -43,6 +43,12 @@ public class VehicleEntity extends EquipmentEntity {
         this.autonomous = autonomous;
     }
 
+    public void updateCharacteristics(String licensePlate, Integer passengerCapacity, boolean autonomous) {
+        this.licensePlate = licensePlate;
+        this.passengerCapacity = passengerCapacity;
+        this.autonomous = autonomous;
+    }
+
     public String getLicensePlate() {
         return licensePlate;
     }

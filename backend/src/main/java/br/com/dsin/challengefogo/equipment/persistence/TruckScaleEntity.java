@@ -36,6 +36,11 @@ public class TruckScaleEntity extends EquipmentEntity {
         this.weighInMotion = weighInMotion;
     }
 
+    public void updateCharacteristics(BigDecimal maxCapacityTons, boolean weighInMotion) {
+        this.maxCapacityTons = maxCapacityTons;
+        this.weighInMotion = weighInMotion;
+    }
+
     public BigDecimal getMaxCapacityTons() {
         return maxCapacityTons;
     }

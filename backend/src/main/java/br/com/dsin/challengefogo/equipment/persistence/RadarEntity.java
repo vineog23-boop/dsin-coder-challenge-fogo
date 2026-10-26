@@ -41,6 +41,12 @@ public class RadarEntity extends EquipmentEntity {
         this.lanes = lanes;
     }
 
+    public void updateCharacteristics(RadarModality modality, Integer speedLimitKmh, Integer lanes) {
+        this.modality = modality;
+        this.speedLimitKmh = speedLimitKmh;
+        this.lanes = lanes;
+    }
+
     public RadarModality getModality() {
         return modality;
     }

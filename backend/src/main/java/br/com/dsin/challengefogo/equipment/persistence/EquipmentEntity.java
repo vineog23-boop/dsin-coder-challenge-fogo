@@ -4,6 +4,7 @@ import br.com.dsin.challengefogo.equipment.domain.EquipmentStatus;
 import br.com.dsin.challengefogo.equipment.domain.EquipmentType;
 import br.com.dsin.challengefogo.equipment.domain.MaintenanceNeed;
 import br.com.dsin.challengefogo.shared.domain.Agency;
+import br.com.dsin.challengefogo.shared.domain.BusinessRuleException;
 import br.com.dsin.challengefogo.shared.domain.Location;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -96,6 +97,53 @@ public class EquipmentEntity {
         this.nextMaintenanceDate = nextMaintenanceDate;
         this.maintenanceIntervalDays = maintenanceIntervalDays;
         this.location = location;
+    }
+
+    /** Edita os dados comuns. Tipo e situação ficam de fora: o tipo não muda e a situação tem rota própria. */
+    public void update(String serialNumber, String brand, String model, Agency agency, MaintenanceNeed maintenanceNeed,
+                       LocalDate nextMaintenanceDate, Integer maintenanceIntervalDays, Location location) {
+        this.serialNumber = serialNumber;
+        this.brand = brand;
+        this.model = model;
+        this.agency = agency;
+        this.maintenanceNeed = maintenanceNeed;
+        this.nextMaintenanceDate = nextMaintenanceDate;
+        this.maintenanceIntervalDays = maintenanceIntervalDays;
+        this.location = location;
+    }
+
+    /**
+     * Muda a situação e devolve a anterior, para o histórico. Falha exige manutenção imediata (regra 3).
+     */
+    public EquipmentStatus changeStatus(EquipmentStatus newStatus) {
+        if (newStatus == status) {
+            throw new BusinessRuleException("O equipamento já está nessa situação.");
+        }
+        EquipmentStatus previous = status;
+        status = newStatus;
+        if (newStatus == EquipmentStatus.MALFUNCTION) {
+            maintenanceNeed = MaintenanceNeed.IMMEDIATE;
+        }
+        return previous;
+    }
+
+    /**
+     * Aplica a regra 5: equipamento em falha ou em manutenção volta a operar, e a próxima manutenção é
+     * agendada pelo intervalo (ou a pendência é zerada). Devolve {@code true} se a situação mudou.
+     */
+    public boolean registerMaintenance(LocalDate performedOn) {
+        if (maintenanceIntervalDays != null) {
+            maintenanceNeed = MaintenanceNeed.SCHEDULED;
+            nextMaintenanceDate = performedOn.plusDays(maintenanceIntervalDays);
+        } else {
+            maintenanceNeed = MaintenanceNeed.NONE;
+            nextMaintenanceDate = null;
+        }
+        if (status == EquipmentStatus.MALFUNCTION || status == EquipmentStatus.UNDER_MAINTENANCE) {
+            status = EquipmentStatus.OPERATIONAL;
+            return true;
+        }
+        return false;
     }
 
     public UUID getId() {

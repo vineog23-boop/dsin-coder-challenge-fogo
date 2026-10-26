@@ -47,6 +47,13 @@ public class CameraEntity extends EquipmentEntity {
         this.ptz = ptz;
     }
 
+    public void updateCharacteristics(boolean nightVision, CameraResolution resolution, boolean color, boolean ptz) {
+        this.nightVision = nightVision;
+        this.resolution = resolution;
+        this.color = color;
+        this.ptz = ptz;
+    }
+
     public boolean isNightVision() {
         return nightVision;
     }

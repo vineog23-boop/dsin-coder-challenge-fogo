@@ -88,12 +88,12 @@ Para veículos, a localização é a da **base** (garagem/ponto).
 
 ## Critérios de aceite
 
-- [ ] Criar um equipamento de cada grupo (radar, câmera, balança, veículo, patinete, cancela) e lê-lo de volta com suas características.
-- [ ] `RADAR` com bloco `camera` → `400`; radar `SPEED` sem `speedLimitKmh` → `400`.
-- [ ] Número de série duplicado → `409`.
-- [ ] Mudar para `MALFUNCTION` gera histórico e `maintenanceNeed = IMMEDIATE`.
-- [ ] Registrar manutenção em equipamento com falha o devolve a `OPERATIONAL` e recalcula a próxima data.
-- [ ] Filtros combinados (ex.: `type=RADAR&region=NORTH&status=MALFUNCTION`) retornam só os correspondentes, paginados.
+- [x] Criar um equipamento de cada grupo (radar, câmera, balança, veículo, patinete, cancela) e lê-lo de volta com suas características.
+- [x] `RADAR` com bloco `camera` → `400`; radar `SPEED` sem `speedLimitKmh` → `400`.
+- [x] Número de série duplicado → `409`.
+- [x] Mudar para `MALFUNCTION` gera histórico e `maintenanceNeed = IMMEDIATE`.
+- [x] Registrar manutenção em equipamento com falha o devolve a `OPERATIONAL` e recalcula a próxima data.
+- [x] Filtros combinados (ex.: `type=RADAR&region=NORTH&status=MALFUNCTION`) retornam só os correspondentes, paginados.
 - [ ] Após `docker compose up --build`, o seed aparece em `GET /api/equipments`.
 - [ ] Formulário do front troca os campos ao trocar o tipo e mostra erro de validação vindo da API.
 

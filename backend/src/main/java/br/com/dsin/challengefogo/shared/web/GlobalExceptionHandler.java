@@ -3,9 +3,11 @@ package br.com.dsin.challengefogo.shared.web;
 import br.com.dsin.challengefogo.auth.application.InvalidCredentialsException;
 import br.com.dsin.challengefogo.shared.domain.BusinessRuleException;
 import br.com.dsin.challengefogo.shared.domain.ConflictException;
+import br.com.dsin.challengefogo.shared.domain.FieldValidationException;
 import br.com.dsin.challengefogo.shared.domain.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -48,6 +50,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problem.setProperty("errors", errors);
 
         return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @ExceptionHandler(FieldValidationException.class)
+    public ProblemDetail handleFieldValidation(FieldValidationException ex) {
+        List<FieldError> errors = ex.getViolations().stream()
+                .map(violation -> new FieldError(violation.field(), violation.message()))
+                .toList();
+
+        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, ProblemTypes.VALIDATION, "Dados inválidos",
+                ex.getMessage());
+        problem.setProperty("errors", errors);
+        return problem;
+    }
+
+    /** Ordenação por campo inexistente ({@code ?sort=foo}) é erro do cliente, não do servidor. */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ProblemDetail handlePropertyReference(PropertyReferenceException ex) {
+        return problem(HttpStatus.BAD_REQUEST, ProblemTypes.VALIDATION, "Dados inválidos",
+                "Campo de ordenação inválido: " + ex.getPropertyName() + ".");
     }
 
     @ExceptionHandler(NotFoundException.class)

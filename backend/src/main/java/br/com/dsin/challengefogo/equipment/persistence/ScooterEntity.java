@@ -44,6 +44,12 @@ public class ScooterEntity extends EquipmentEntity {
         this.batteryLevel = batteryLevel;
     }
 
+    public void updateCharacteristics(ScooterOwnership ownership, String operatorName, Integer batteryLevel) {
+        this.ownership = ownership;
+        this.operatorName = operatorName;
+        this.batteryLevel = batteryLevel;
+    }
+
     public ScooterOwnership getOwnership() {
         return ownership;
     }

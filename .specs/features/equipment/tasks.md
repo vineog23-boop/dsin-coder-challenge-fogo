@@ -16,8 +16,8 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 `EquipmentDtoRequest` (comuns + blocos opcionais), `EquipmentDtoResponse`, `EquipmentService.create`, `POST /api/equipments`.
 
-- [ ] Aceite: regra 1 da spec (bloco ↔ tipo, `speedLimitKmh` em radar `SPEED`) → `400` com o campo apontado.
-- [ ] Aceite: serial ou placa duplicada → `409`; criação válida → `201` com `Location`.
+- [x] Aceite: regra 1 da spec (bloco ↔ tipo, `speedLimitKmh` em radar `SPEED`) → `400` com o campo apontado.
+- [x] Aceite: serial ou placa duplicada → `409`; criação válida → `201` com `Location`.
 - Verificação: unitário do service (TDD, regras 1, 2, 6); MockMvc `201`/`400`/`409`; `./mvnw test`.
 - Arquivos: `equipment/web/EquipmentController.java`, DTOs, `equipment/application/EquipmentService.java`, `EquipmentTypeValidator.java`, testes.
 - Depende de: T8, T5.
@@ -26,8 +26,8 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 `GET /api/equipments/{id}` e `GET /api/equipments` com filtros da spec (`Specification`), `search` em serial/marca/modelo/placa, página máxima 100.
 
-- [ ] Aceite: id inexistente → `404` (`EquipmentNotFoundException`).
-- [ ] Aceite: filtros combinados retornam só os correspondentes, paginados (integração com dados de teste).
+- [x] Aceite: id inexistente → `404` (`EquipmentNotFoundException`).
+- [x] Aceite: filtros combinados retornam só os correspondentes, paginados (integração com dados de teste).
 - Verificação: `EquipmentSpecificationsTest`, MockMvc; `./mvnw test`.
 - Arquivos: `EquipmentSpecifications.java`, service, controller, `EquipmentNotFoundException.java`, testes.
 - Depende de: T9.
@@ -36,7 +36,7 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 `PUT /api/equipments/{id}` via `equipment.update(...)`; não altera `type` nem `status`.
 
-- [ ] Aceite: mudar dados comuns e do bloco funciona; `type` diferente do atual → `422`.
+- [x] Aceite: mudar dados comuns e do bloco funciona; `type` diferente do atual → `422`.
 - Verificação: unitário + MockMvc; `./mvnw test`.
 - Arquivos: entidades (método `update`), service, controller, testes.
 - Depende de: T10.
@@ -45,8 +45,8 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 `PATCH /api/equipments/{id}/status`, `equipment.changeStatus(...)` grava em `equipment_status_history` com o usuário do token; `GET /api/equipments/{id}/history` (situações + manutenções, mais recente primeiro).
 
-- [ ] Aceite: `MALFUNCTION` → `maintenanceNeed = IMMEDIATE` e linha no histórico; mesma situação → `422`.
-- [ ] Aceite: histórico retorna os eventos ordenados.
+- [x] Aceite: `MALFUNCTION` → `maintenanceNeed = IMMEDIATE` e linha no histórico; mesma situação → `422`.
+- [x] Aceite: histórico retorna os eventos ordenados.
 - Verificação: unitário (TDD, regras 3 e 4); MockMvc; `./mvnw test`.
 - Arquivos: `EquipmentStatusHistoryEntity.java` + repository, service, controller, DTO de histórico, testes.
 - Depende de: T10.
@@ -55,13 +55,13 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 `POST /api/equipments/{id}/maintenances`.
 
-- [ ] Aceite: em `MALFUNCTION`/`UNDER_MAINTENANCE` volta a `OPERATIONAL` com histórico; com intervalo, recalcula `nextMaintenanceDate` e `SCHEDULED`; sem intervalo, `NONE`.
+- [x] Aceite: em `MALFUNCTION`/`UNDER_MAINTENANCE` volta a `OPERATIONAL` com histórico; com intervalo, recalcula `nextMaintenanceDate` e `SCHEDULED`; sem intervalo, `NONE`.
 - Verificação: unitário (TDD, regra 5); MockMvc; `./mvnw test`.
 - Arquivos: `EquipmentMaintenanceEntity.java` + repository, service, controller, DTO, testes.
 - Depende de: T12.
 
 ## Checkpoint C
-- [ ] `./mvnw test` verde; todos os critérios de aceite da API de equipamento conferidos via Swagger.
+- [x] `./mvnw test` verde (76 testes); critérios de aceite da API de equipamento conferidos com chamadas reais no compose (script `smoke-g1.sh`, em vez do Swagger).
 
 ## T14: Front: lista de equipamentos
 
