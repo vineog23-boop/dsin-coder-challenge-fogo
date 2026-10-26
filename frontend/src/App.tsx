@@ -2,6 +2,8 @@ import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useSession } from './lib/session/session'
 import AgentListPage from './pages/AgentListPage'
+import EquipmentDetailPage from './pages/EquipmentDetailPage'
+import EquipmentFormPage from './pages/EquipmentFormPage'
 import EquipmentListPage from './pages/EquipmentListPage'
 import LoginPage from './pages/LoginPage'
 
@@ -44,6 +46,9 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/equipamentos" replace />} />
           <Route path="equipamentos" element={<EquipmentListPage />} />
+          <Route path="equipamentos/novo" element={<EquipmentFormPage />} />
+          <Route path="equipamentos/:id" element={<EquipmentDetailPage />} />
+          <Route path="equipamentos/:id/editar" element={<EquipmentFormPage />} />
           <Route path="agentes" element={<AgentListPage />} />
           <Route path="*" element={<Navigate to="/equipamentos" replace />} />
         </Route>

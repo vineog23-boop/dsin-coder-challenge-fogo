@@ -67,7 +67,7 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 `src/lib/api/equipments.ts` (tipos + chamadas), página com tabela paginada, filtros e busca, rótulos em português, estados de carregamento/erro/vazio.
 
-- [ ] Aceite: filtros e paginação refletem na URL e na API.
+- [x] Aceite: filtros e paginação refletem na URL e na API.
 - Verificação: `npm run lint`, `npm test`, `npm run build`; navegador (celular e desktop).
 - Arquivos: `src/lib/api/equipments.ts`, `src/lib/labels.ts`, `src/pages/EquipmentListPage.tsx`, `src/components/EquipmentFilters.tsx`, teste.
 - Depende de: T7, T10.
@@ -76,8 +76,8 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 Criar/editar; campos do bloco mudam conforme o tipo; CEP via ViaCEP (falha não bloqueia); mini-mapa Leaflet para escolher a coordenada; erros da API ligados aos campos.
 
-- [ ] Aceite: trocar o tipo troca os campos; erro `400` da API aparece no campo certo.
-- [ ] Aceite: CEP válido preenche rua, bairro e cidade.
+- [x] Aceite: trocar o tipo troca os campos; erro `400` da API aparece no campo certo.
+- [x] Aceite: CEP válido preenche rua, bairro e cidade.
 - Verificação: lint, teste do formulário (troca de tipo), build; navegador.
 - Arquivos: `src/pages/EquipmentFormPage.tsx`, `src/components/TypeSpecificFields.tsx`, `src/components/LocationPicker.tsx`, `src/lib/api/viaCep.ts`, teste.
 - Depende de: T14, T11.
@@ -86,20 +86,20 @@ Criar/editar; campos do bloco mudam conforme o tipo; CEP via ViaCEP (falha não 
 
 Detalhe com características, localização (mapa pequeno), histórico em linha do tempo; mudar situação e registrar manutenção (só gestor).
 
-- [ ] Aceite: ações atualizam o detalhe e o histórico sem recarregar a página; operador não vê as ações.
+- [x] Aceite: ações atualizam o detalhe e o histórico sem recarregar a página; operador não vê as ações.
 - Verificação: lint, test, build; navegador com os dois perfis.
-- Arquivos: `src/pages/EquipmentDetailPage.tsx`, `src/components/StatusHistory.tsx`, `src/components/StatusChangeDialog.tsx`, `src/components/MaintenanceDialog.tsx`.
+- Arquivos: `src/pages/EquipmentDetailPage.tsx`, `src/components/StatusHistory.tsx`, `src/components/StatusChangeForm.tsx`, `src/components/MaintenanceForm.tsx` (formulários embutidos na página em vez de diálogos modais).
 - Depende de: T15, T13.
 
 ## T17: Seed de equipamentos
 
 `shared/demo/DemoEquipmentSeeder`: ~150 equipamentos em Presidente Prudente, todos os tipos e regiões, `Random(42)`; ~6 meses de histórico com mais falhas em certas regiões e horários (documentar o padrão em comentário, para a Parte 3 validar).
 
-- [ ] Aceite: banco vazio + perfil `demo` → ~150 equipamentos; segunda subida não duplica.
-- [ ] Aceite: duas subidas do zero geram os mesmos dados.
+- [x] Aceite: banco vazio + perfil `demo` → ~150 equipamentos; segunda subida não duplica.
+- [x] Aceite: duas subidas do zero geram os mesmos dados.
 - Verificação: teste de integração do seeder (contagem e idempotência); `docker compose down -v && docker compose up --build`.
 - Arquivos: `shared/demo/DemoEquipmentSeeder.java`, `shared/demo/PrudenteGeo.java` (ruas, bairros, CEPs, área), teste.
 - Depende de: T13.
 
 ## Checkpoint D
-- [ ] Cadastro de equipamento completo no navegador, com seed visível; critérios de aceite da spec `equipment` marcados.
+- [x] Cadastro de equipamento completo no navegador, com seed visível; critérios de aceite da spec `equipment` marcados.

@@ -94,8 +94,8 @@ Para veículos, a localização é a da **base** (garagem/ponto).
 - [x] Mudar para `MALFUNCTION` gera histórico e `maintenanceNeed = IMMEDIATE`.
 - [x] Registrar manutenção em equipamento com falha o devolve a `OPERATIONAL` e recalcula a próxima data.
 - [x] Filtros combinados (ex.: `type=RADAR&region=NORTH&status=MALFUNCTION`) retornam só os correspondentes, paginados.
-- [ ] Após `docker compose up --build`, o seed aparece em `GET /api/equipments`.
-- [ ] Formulário do front troca os campos ao trocar o tipo e mostra erro de validação vindo da API.
+- [x] Após `docker compose up --build`, o seed aparece em `GET /api/equipments`.
+- [x] Formulário do front troca os campos ao trocar o tipo e mostra erro de validação vindo da API.
 
 ## Testes
 
