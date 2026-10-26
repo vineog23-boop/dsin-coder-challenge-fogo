@@ -26,10 +26,10 @@ Proteger a API e o dashboard com login, separando quem **altera** dados (gestor)
 
 ## Critérios de aceite
 
-- [ ] Login válido devolve token; inválido devolve `401` sem dizer se o erro foi usuário ou senha.
-- [ ] Operador recebe `403` em `POST`/`PUT` de equipamento e agente.
-- [ ] Gestor consegue criar equipamento.
-- [ ] Endpoints sem token devolvem `401`; `/api/auth/login` e a documentação OpenAPI são públicos.
+- [x] Login válido devolve token; inválido devolve `401` sem dizer se o erro foi usuário ou senha.
+- [x] Operador recebe `403` em `POST`/`PUT` de equipamento e agente.
+- [x] Gestor consegue criar equipamento.
+- [x] Endpoints sem token devolvem `401`; `/api/auth/login` e a documentação OpenAPI são públicos.
 
 ## Testes
 

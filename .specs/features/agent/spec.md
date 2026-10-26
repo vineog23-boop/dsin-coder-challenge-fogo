@@ -66,12 +66,12 @@ Dados pessoais mínimos: sem CPF, telefone ou endereço residencial.
 
 ## Critérios de aceite
 
-- [ ] Criar agente de cada tipo e lê-lo com o órgão derivado.
-- [ ] Vincular viatura da PM a um guarda municipal → `422`.
-- [ ] Vincular veículo `STOLEN` → `422`.
-- [ ] Mudar para `OFF_DUTY` grava histórico e remove o veículo.
-- [ ] Operador consegue atualizar posição e recebe `403` ao mudar situação.
-- [ ] Filtro `agency=MUNICIPAL_GUARD&status=AVAILABLE` retorna só os correspondentes.
+- [x] Criar agente de cada tipo e lê-lo com o órgão derivado.
+- [x] Vincular viatura da PM a um guarda municipal → `422`.
+- [x] Vincular veículo `STOLEN` → `422`.
+- [x] Mudar para `OFF_DUTY` grava histórico e remove o veículo.
+- [x] Operador consegue atualizar posição e recebe `403` ao mudar situação.
+- [x] Filtro `agency=MUNICIPAL_GUARD&status=AVAILABLE` retorna só os correspondentes.
 
 ## Testes
 

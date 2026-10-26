@@ -49,8 +49,8 @@ Projeto Spring Boot 4.1.1 em `backend/` (Maven Wrapper, Java 21, pacote `br.com.
 
 README na raiz: o que é, como rodar (um comando), credenciais demo, mapa das funcionalidades, decisões técnicas, **IAs usadas e como foram usadas** (exigência do desafio), roteiro do vídeo.
 
-- [ ] Aceite: seguindo só o README, em clone limpo, o sistema sobe e o login demo funciona.
-- [ ] Aceite: todos os critérios de aceite das specs `auth`, `equipment` e `agent` conferidos e marcados.
+- [x] Aceite: seguindo só o README, em clone limpo, o sistema sobe e o login demo funciona (cópia só com os arquivos versionados, volume novo: pronto em 14 s, 150 equipamentos, 40 agentes, gestor e operador entram).
+- [x] Aceite: todos os critérios de aceite das specs `auth`, `equipment` e `agent` conferidos e marcados.
 - Verificação: `docker compose down -v && docker compose up --build` + roteiro manual.
 - Arquivos: `README.md`.
 - Depende de: T21.
