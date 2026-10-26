@@ -31,6 +31,9 @@ class DemoEquipmentSeederTest {
     private DemoEquipmentSeeder seeder;
 
     @Autowired
+    private DemoAgentSeeder agentSeeder;
+
+    @Autowired
     private EquipmentRepository equipmentRepository;
 
     @Autowired
@@ -84,11 +87,14 @@ class DemoEquipmentSeederTest {
 
         seeder.run(null);
         long countAfterSecondRun = equipmentRepository.count();
-        jdbcTemplate.execute("delete from equipment_maintenance; delete from equipment_status_history; "
+        // Agentes apontam para as viaturas: saem primeiro.
+        jdbcTemplate.execute("delete from agent_status_history; delete from agent; "
+                + "delete from equipment_maintenance; delete from equipment_status_history; "
                 + "delete from radar; delete from camera; delete from truck_scale; delete from vehicle; "
                 + "delete from scooter; delete from equipment");
         seeder.run(null);
         String afterReseed = jdbcTemplate.queryForObject(FINGERPRINT, String.class);
+        agentSeeder.run(null); // devolve o banco ao estado de demonstração completo para os outros testes
 
         assertThat(countAfterSecondRun).isEqualTo(150);
         assertThat(afterReseed).isEqualTo(before);

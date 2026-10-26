@@ -24,6 +24,7 @@ import br.com.dsin.challengefogo.shared.domain.Region;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,8 +59,10 @@ import java.util.Set;
  * equipamentos com intervalo recebem manutenção preventiva periódica. Ciclos que não terminaram até hoje
  * deixam o equipamento em falha ou em manutenção, como estaria na vida real.
  */
+/* Antes do seed de agentes, que usa as viaturas criadas aqui. */
 @Component
 @Profile("demo")
+@Order(1)
 public class DemoEquipmentSeeder implements ApplicationRunner {
 
     static final long SEED = 42L;
