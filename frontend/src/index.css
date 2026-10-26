@@ -83,3 +83,91 @@ h1 {
   margin: 0 auto;
   padding: 1.5rem 1rem;
 }
+
+.app-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  font-size: 0.875rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-h);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent-bg);
+}
+
+button[type='submit'] {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+input {
+  font: inherit;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-h);
+  background: var(--surface);
+}
+
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 360px;
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.login-card h1 {
+  margin-bottom: 0.5rem;
+}
+
+.login-card label {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.login-card input {
+  margin-bottom: 0.5rem;
+}
+
+.form-error {
+  margin: 0;
+  color: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .form-error {
+    color: #f87171;
+  }
+}

@@ -23,6 +23,19 @@ export class ApiError extends Error {
   }
 }
 
+let authToken: string | null = null
+let onUnauthorized: (() => void) | null = null
+
+/** A sessão registra aqui o token; o cliente o envia em toda chamada sem cada tela repassá-lo. */
+export function setAuthToken(token: string | null) {
+  authToken = token
+}
+
+/** Chamado quando a API recusa um token enviado (expirado ou inválido), para a sessão encerrar. */
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler
+}
+
 type RequestOptions = Omit<RequestInit, 'body' | 'headers'> & {
   body?: unknown
   headers?: Record<string, string>
@@ -37,6 +50,7 @@ export async function api<T>(path: string, { body, headers, ...init }: RequestOp
       headers: {
         Accept: 'application/json',
         ...(body !== undefined && { 'Content-Type': 'application/json' }),
+        ...(authToken && { Authorization: `Bearer ${authToken}` }),
         ...headers,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -51,6 +65,10 @@ export async function api<T>(path: string, { body, headers, ...init }: RequestOp
   }
 
   if (!response.ok) {
+    // Sem token, 401 é credencial errada no login: a tela trata, não há sessão a encerrar.
+    if (response.status === 401 && authToken) {
+      onUnauthorized?.()
+    }
     throw new ApiError(await readProblem(response))
   }
 

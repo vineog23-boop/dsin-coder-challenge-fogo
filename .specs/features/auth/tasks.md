@@ -26,11 +26,11 @@ Migration `app_user` (`id`, `username` único, `password_hash`, `role`). `UserEn
 
 Página de login; `src/lib/api/auth.ts`; contexto de sessão (token em memória + `sessionStorage`, perfil); rotas protegidas; `401` → volta ao login; logout; helper `canEdit` para esconder ações do operador.
 
-- [ ] Aceite: login com `gestor` e `operador` funciona; credencial errada mostra mensagem.
-- [ ] Aceite: recarregar a página mantém a sessão; logout limpa.
+- [x] Aceite: login com `gestor` e `operador` funciona; credencial errada mostra mensagem.
+- [x] Aceite: recarregar a página mantém a sessão; logout limpa.
 - Verificação: `npm run lint`, `npm test` (teste do contexto de sessão), `npm run build`; navegador.
 - Arquivos: `src/pages/LoginPage.tsx`, `src/lib/api/auth.ts`, `src/lib/session/SessionContext.tsx`, `src/components/ProtectedRoute.tsx`, teste.
 - Depende de: T3, T6.
 
 ## Checkpoint B
-- [ ] Login funciona no navegador com os dois perfis via `docker compose up --build`.
+- [x] Login funciona no navegador com os dois perfis via `docker compose up --build`.
