@@ -6,9 +6,9 @@ Spec: `spec.md`. Plano: `.specs/plan-parte-1.md`.
 
 Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter`, `equipment_status_history`, `equipment_maintenance` (FKs, `unique` em `serial_number` e `license_plate`, índices em `status`, `type`, `region`). Enums, `EquipmentEntity` (`@Inheritance(JOINED)`), 5 subclasses, `EquipmentRepository`.
 
-- [ ] Aceite: teste de integração (Testcontainers) salva e relê um equipamento de cada subclasse e um `AUTOMATED_GATE` só na tabela base.
-- [ ] Aceite: `ddl-auto=validate` sobe sem erro.
-- Verificação: `./mvnw test -Dtest=EquipmentRepositoryIT`, `./mvnw test`.
+- [x] Aceite: teste de integração (Testcontainers) salva e relê um equipamento de cada subclasse e um `AUTOMATED_GATE` só na tabela base.
+- [x] Aceite: `ddl-auto=validate` sobe sem erro.
+- Verificação: `./mvnw test -Dtest=EquipmentRepositoryTest`, `./mvnw test`. (Sufixo `Test`, não `IT`: o surefire padrão não roda `*IT`.)
 - Arquivos: `V2__create_equipment.sql`, `equipment/domain/*` (enums), `equipment/persistence/*Entity.java`, `EquipmentRepository.java`, teste.
 - Depende de: T2.
 
@@ -28,7 +28,7 @@ Migration com `equipment`, `radar`, `camera`, `truck_scale`, `vehicle`, `scooter
 
 - [ ] Aceite: id inexistente → `404` (`EquipmentNotFoundException`).
 - [ ] Aceite: filtros combinados retornam só os correspondentes, paginados (integração com dados de teste).
-- Verificação: `EquipmentSpecificationsIT`, MockMvc; `./mvnw test`.
+- Verificação: `EquipmentSpecificationsTest`, MockMvc; `./mvnw test`.
 - Arquivos: `EquipmentSpecifications.java`, service, controller, `EquipmentNotFoundException.java`, testes.
 - Depende de: T9.
 
