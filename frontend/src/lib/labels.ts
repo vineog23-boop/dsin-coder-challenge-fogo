@@ -9,6 +9,7 @@ import type {
   Region,
   ScooterOwnership,
 } from './api/equipments'
+import type { AgentStatus, AgentType } from './api/agents'
 
 /** Rótulos em português de todos os enums da API; a tela nunca mostra o valor cru. */
 export const TYPE_LABEL: Record<EquipmentType, string> = {
@@ -81,6 +82,19 @@ export const SCOOTER_OWNERSHIP_LABEL: Record<ScooterOwnership, string> = {
 export const MAINTENANCE_KIND_LABEL: Record<MaintenanceKind, string> = {
   CORRECTIVE: 'Corretiva',
   PREVENTIVE: 'Preventiva',
+}
+
+export const AGENT_TYPE_LABEL: Record<AgentType, string> = {
+  TRAFFIC_AGENT: 'Agente de trânsito',
+  MUNICIPAL_GUARD: 'Guarda municipal',
+  MILITARY_POLICE: 'Policial militar',
+}
+
+export const AGENT_STATUS_LABEL: Record<AgentStatus, string> = {
+  AVAILABLE: 'Disponível',
+  ON_OCCURRENCE: 'Em ocorrência',
+  OFF_DUTY: 'Fora de serviço',
+  ON_LEAVE: 'Afastado',
 }
 
 const dateTime = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' })

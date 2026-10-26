@@ -1,6 +1,8 @@
 import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useSession } from './lib/session/session'
+import AgentDetailPage from './pages/AgentDetailPage'
+import AgentFormPage from './pages/AgentFormPage'
 import AgentListPage from './pages/AgentListPage'
 import EquipmentDetailPage from './pages/EquipmentDetailPage'
 import EquipmentFormPage from './pages/EquipmentFormPage'
@@ -50,6 +52,9 @@ export default function App() {
           <Route path="equipamentos/:id" element={<EquipmentDetailPage />} />
           <Route path="equipamentos/:id/editar" element={<EquipmentFormPage />} />
           <Route path="agentes" element={<AgentListPage />} />
+          <Route path="agentes/novo" element={<AgentFormPage />} />
+          <Route path="agentes/:id" element={<AgentDetailPage />} />
+          <Route path="agentes/:id/editar" element={<AgentFormPage />} />
           <Route path="*" element={<Navigate to="/equipamentos" replace />} />
         </Route>
       </Route>

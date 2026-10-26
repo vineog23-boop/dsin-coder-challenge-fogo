@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import Field from '../components/Field'
 import TextField from '../components/TextField'
-import LocationPicker from '../components/LocationPicker'
+import LocationFields from '../components/LocationFields'
 import TypeSpecificFields from '../components/TypeSpecificFields'
 import { ApiError } from '../lib/api/client'
 import {
@@ -10,7 +10,6 @@ import {
   EQUIPMENT_STATUSES,
   EQUIPMENT_TYPES,
   MAINTENANCE_NEEDS,
-  REGIONS,
   blockOf,
   createEquipment,
   getEquipment,
@@ -22,16 +21,13 @@ import {
   type EquipmentStatus,
   type EquipmentType,
   type MaintenanceNeed,
-  type Region,
 } from '../lib/api/equipments'
-import { lookupCep } from '../lib/api/viaCep'
 import { EMPTY_BLOCKS, type BlockValues } from '../lib/blockValues'
+import { EMPTY_LOCATION, fromLocation, toLocation, type LocationForm } from '../lib/locationForm'
 import { describedBy } from '../lib/describedBy'
-import { regionOf } from '../lib/geo'
 import {
   AGENCY_LABEL,
   MAINTENANCE_NEED_LABEL,
-  REGION_LABEL,
   STATUS_LABEL,
   TYPE_LABEL,
 } from '../lib/labels'
@@ -47,15 +43,7 @@ type FormState = {
   maintenanceNeed: MaintenanceNeed
   nextMaintenanceDate: string
   maintenanceIntervalDays: string
-  zipCode: string
-  street: string
-  reference: string
-  neighborhood: string
-  city: string
-  state: string
-  region: Region
-  latitude: number | null
-  longitude: number | null
+  location: LocationForm
   blocks: BlockValues
 }
 
@@ -69,15 +57,7 @@ const EMPTY_FORM: FormState = {
   maintenanceNeed: 'NONE',
   nextMaintenanceDate: '',
   maintenanceIntervalDays: '',
-  zipCode: '',
-  street: '',
-  reference: '',
-  neighborhood: '',
-  city: 'Presidente Prudente',
-  state: 'SP',
-  region: 'CENTER',
-  latitude: null,
-  longitude: null,
+  location: EMPTY_LOCATION,
   blocks: EMPTY_BLOCKS,
 }
 
@@ -104,17 +84,7 @@ function toRequest(form: FormState, isNew: boolean): EquipmentRequest {
     maintenanceNeed: form.maintenanceNeed,
     nextMaintenanceDate: form.nextMaintenanceDate || null,
     maintenanceIntervalDays: toNumber(form.maintenanceIntervalDays),
-    location: {
-      zipCode: form.zipCode.replace(/\D/g, '') || null,
-      street: form.street.trim(),
-      reference: form.reference.trim() || null,
-      neighborhood: form.neighborhood.trim(),
-      city: form.city.trim(),
-      state: form.state.trim().toUpperCase(),
-      region: form.region,
-      latitude: form.latitude as number,
-      longitude: form.longitude as number,
-    },
+    location: toLocation(form.location),
     radar:
       block === 'radar'
         ? { modality: radar.modality, speedLimitKmh: toNumber(radar.speedLimitKmh), lanes: toNumber(radar.lanes) }
@@ -155,15 +125,7 @@ function toForm(equipment: Equipment): FormState {
     maintenanceNeed: equipment.maintenanceNeed,
     nextMaintenanceDate: equipment.nextMaintenanceDate ?? '',
     maintenanceIntervalDays: toText(equipment.maintenanceIntervalDays),
-    zipCode: location.zipCode ?? '',
-    street: location.street ?? '',
-    reference: location.reference ?? '',
-    neighborhood: location.neighborhood ?? '',
-    city: location.city ?? '',
-    state: location.state ?? '',
-    region: location.region,
-    latitude: location.latitude,
-    longitude: location.longitude,
+    location: fromLocation(location),
     blocks: {
       radar: equipment.radar
         ? {
@@ -207,7 +169,6 @@ export default function EquipmentFormPage() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
-  const [cepHint, setCepHint] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -232,29 +193,6 @@ export default function EquipmentFormPage() {
 
   function setBlock<B extends CharacteristicsBlock>(block: B, values: BlockValues[B]) {
     setForm((current) => ({ ...current, blocks: { ...current.blocks, [block]: values } }))
-  }
-
-  async function fillFromCep() {
-    const digits = form.zipCode.replace(/\D/g, '')
-    if (digits.length !== 8) return
-    setCepHint('Buscando CEP…')
-    const address = await lookupCep(digits)
-    if (!address) {
-      setCepHint('CEP não encontrado ou serviço indisponível. Preencha o endereço manualmente.')
-      return
-    }
-    setCepHint(null)
-    setForm((current) => ({
-      ...current,
-      street: address.street || current.street,
-      neighborhood: address.neighborhood || current.neighborhood,
-      city: address.city || current.city,
-      state: address.state || current.state,
-    }))
-  }
-
-  function pickLocation(latitude: number, longitude: number) {
-    setForm((current) => ({ ...current, latitude, longitude, region: regionOf(latitude, longitude) }))
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -287,8 +225,6 @@ export default function EquipmentFormPage() {
       </div>
     )
   }
-
-  const locationError = errors['location.latitude'] ?? errors['location.longitude'] ?? errors.location
 
   return (
     <section className="page">
@@ -395,54 +331,13 @@ export default function EquipmentFormPage() {
           </Field>
         </fieldset>
 
-        <fieldset>
-          <legend>Localização{blockOf(form.type) === 'vehicle' ? ' da base' : ''}</legend>
-          <Field id="location.zipCode" label="CEP" error={errors['location.zipCode']} hint={cepHint ?? 'Preenche rua, bairro e cidade.'}>
-            <input
-              id="location.zipCode"
-              inputMode="numeric"
-              maxLength={9}
-              value={form.zipCode}
-              aria-invalid={!!errors['location.zipCode']}
-              aria-describedby={describedBy('location.zipCode', errors['location.zipCode'], 'cep')}
-              onChange={(e) => set('zipCode', e.target.value.replace(/\D/g, '').slice(0, 8))}
-              onBlur={fillFromCep}
-            />
-          </Field>
-          <TextField id="location.street" label="Rua *" value={form.street} error={errors['location.street']}
-            maxLength={120} onChange={(value) => set('street', value)} />
-          <TextField id="location.reference" label="Referência" value={form.reference}
-            error={errors['location.reference']} maxLength={120} placeholder="número 181, oposto ao 181, S/N…"
-            onChange={(value) => set('reference', value)} />
-          <TextField id="location.neighborhood" label="Bairro *" value={form.neighborhood}
-            error={errors['location.neighborhood']} maxLength={80} onChange={(value) => set('neighborhood', value)} />
-          <TextField id="location.city" label="Cidade *" value={form.city} error={errors['location.city']}
-            maxLength={80} onChange={(value) => set('city', value)} />
-          <TextField id="location.state" label="UF *" value={form.state} error={errors['location.state']}
-            maxLength={2} onChange={(value) => set('state', value.toUpperCase())} />
-          <Field id="location.region" label="Região *" error={errors['location.region']}
-            hint="Sugerida pelo ponto no mapa; pode ajustar.">
-            <select id="location.region" value={form.region} onChange={(e) => set('region', e.target.value as Region)}>
-              {REGIONS.map((region) => (
-                <option key={region} value={region}>
-                  {REGION_LABEL[region]}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className={`field field-wide${locationError ? ' field-invalid' : ''}`}>
-            <span className="field-label" id="map-label">
-              Posição no mapa * <small className="muted">(clique para marcar)</small>
-            </span>
-            <LocationPicker latitude={form.latitude} longitude={form.longitude} onPick={pickLocation} />
-            <small className="muted" aria-live="polite">
-              {form.latitude !== null && form.longitude !== null
-                ? `Latitude ${form.latitude.toFixed(6)}, longitude ${form.longitude.toFixed(6)}`
-                : 'Nenhum ponto marcado.'}
-            </small>
-            {locationError && <small className="field-error">{locationError}</small>}
-          </div>
-        </fieldset>
+        <LocationFields
+          prefix="location"
+          legend={`Localização${blockOf(form.type) === 'vehicle' ? ' da base' : ''}`}
+          value={form.location}
+          errors={errors}
+          onChange={(location) => set('location', location)}
+        />
 
         {formError && (
           <p className="form-error" role="alert">

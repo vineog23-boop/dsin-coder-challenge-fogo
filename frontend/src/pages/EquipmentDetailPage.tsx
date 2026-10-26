@@ -7,11 +7,20 @@ import StatusBadge from '../components/StatusBadge'
 import StatusChangeForm from '../components/StatusChangeForm'
 import StatusHistory from '../components/StatusHistory'
 import { ApiError } from '../lib/api/client'
-import { getEquipment, getHistory, type Equipment, type HistoryEvent, type Page } from '../lib/api/equipments'
+import {
+  EQUIPMENT_STATUSES,
+  changeStatus,
+  getEquipment,
+  getHistory,
+  type Equipment,
+  type HistoryEvent,
+  type Page,
+} from '../lib/api/equipments'
 import {
   AGENCY_LABEL,
   MAINTENANCE_NEED_LABEL,
   REGION_LABEL,
+  STATUS_LABEL,
   TYPE_LABEL,
   formatDate,
 } from '../lib/labels'
@@ -114,7 +123,11 @@ export default function EquipmentDetailPage() {
 
       {action === 'status' && (
         <StatusChangeForm
-          equipment={equipment}
+          current={equipment.status}
+          statuses={EQUIPMENT_STATUSES}
+          labels={STATUS_LABEL}
+          hint={(status) => (status === 'MALFUNCTION' ? 'A manutenção passa a ser imediata.' : null)}
+          onSubmit={(status, note) => changeStatus(equipment.id, status, note)}
           onCancel={() => setAction(null)}
           onDone={() => finish('Situação atualizada.')}
         />
