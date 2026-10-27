@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   if (session) {
     const from = (location.state as { from?: string } | null)?.from
-    return <Navigate to={from ?? '/equipamentos'} replace />
+    return <Navigate to={from ?? '/central'} replace />
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

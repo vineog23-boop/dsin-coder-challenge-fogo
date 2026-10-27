@@ -8,6 +8,7 @@ import EquipmentDetailPage from './pages/EquipmentDetailPage'
 import EquipmentFormPage from './pages/EquipmentFormPage'
 import EquipmentListPage from './pages/EquipmentListPage'
 import LoginPage from './pages/LoginPage'
+import OperationsPage from './pages/OperationsPage'
 
 const ROLE_LABEL = { MANAGER: 'Gestor', OPERATOR: 'Operador' } as const
 
@@ -19,6 +20,7 @@ function Layout() {
       <header className="app-header">
         <span className="app-brand">F.O.G.O.</span>
         <nav aria-label="Principal">
+          <NavLink to="/central">Central</NavLink>
           <NavLink to="/equipamentos">Equipamentos</NavLink>
           <NavLink to="/agentes">Agentes</NavLink>
         </nav>
@@ -46,7 +48,8 @@ export default function App() {
       <Route path="login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
-          <Route index element={<Navigate to="/equipamentos" replace />} />
+          <Route index element={<Navigate to="/central" replace />} />
+          <Route path="central" element={<OperationsPage />} />
           <Route path="equipamentos" element={<EquipmentListPage />} />
           <Route path="equipamentos/novo" element={<EquipmentFormPage />} />
           <Route path="equipamentos/:id" element={<EquipmentDetailPage />} />
@@ -55,7 +58,7 @@ export default function App() {
           <Route path="agentes/novo" element={<AgentFormPage />} />
           <Route path="agentes/:id" element={<AgentDetailPage />} />
           <Route path="agentes/:id/editar" element={<AgentFormPage />} />
-          <Route path="*" element={<Navigate to="/equipamentos" replace />} />
+          <Route path="*" element={<Navigate to="/central" replace />} />
         </Route>
       </Route>
     </Routes>
