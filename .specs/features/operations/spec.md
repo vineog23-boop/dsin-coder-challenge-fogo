@@ -36,6 +36,7 @@ Nenhuma tabela nova. As fontes são `equipment` (situação, manutenção, local
    | `EQUIPMENT_STOLEN` | alta | equipamento em `STOLEN` | última mudança para `STOLEN` |
    | `REGION_WITHOUT_ACTIVE_AGENT` | alta | região sem nenhum agente em atividade com base nela | — |
    | `MAINTENANCE_OVERDUE` | média | regra 3 | `nextMaintenanceDate` |
+   | `MAINTENANCE_DUE_SOON` | baixa | regra 7 | — (a data prevista vai na mensagem) |
 
    Equipamentos `DEACTIVATED` não geram alerta.
 6. **Telemetria simulada** (só no perfil `demo`, ligável por `app.telemetry.enabled`):
@@ -44,6 +45,9 @@ Nenhuma tabela nova. As fontes são `equipment` (situação, manutenção, local
    - atualiza `positionUpdatedAt`;
    - não grava histórico, porque posição não é mudança de situação;
    - agente fora de serviço não se move.
+7. **Manutenção próxima** (acrescentada em 2026-10-27, para cumprir o "próximos da data prevista" do enunciado): `maintenanceNeed = SCHEDULED`, `nextMaintenanceDate` de hoje até hoje + 7 dias e situação diferente de `DEACTIVATED`. Vira indicador (`upcomingMaintenance`) e alerta de severidade baixa.
+8. **Disponibilidade** (calculada no front a partir de `byStatus`, sem campo novo): em uso = total − desativados − não instalados; indisponíveis = com falha + em manutenção + roubados; disponibilidade = operacionais ÷ em uso.
+9. **Bairro** no filtro do mapa: comparado sem diferenciar maiúsculas, como na lista de equipamentos; no agente, vale o bairro da base.
 
 ## API
 
@@ -51,8 +55,9 @@ Todas as rotas são `GET`, para os dois perfis (a regra atual do `SecurityConfig
 
 | Rota | Devolve |
 |---|---|
-| `GET /api/operations/map?equipmentType&equipmentStatus&agentStatus&region&agency` | `{ equipments: [...], agents: [...] }` em formato leve para os marcadores |
+| `GET /api/operations/map?equipmentType&equipmentStatus&agentStatus&region&agency&neighborhood` | `{ equipments: [...], agents: [...] }` em formato leve para os marcadores |
 | `GET /api/operations/summary` | indicadores gerais e por região |
+| `GET /api/operations/neighborhoods` | bairros existentes (equipamentos e bases), em ordem, para o filtro |
 | `GET /api/operations/alerts?page&size` | alertas paginados (máx. 100), na ordem da regra 5 |
 
 **Marcador de equipamento:** `id`, `type`, `serialNumber`, `status`, `maintenanceNeed`, `latitude`, `longitude`, `region`.
@@ -64,14 +69,14 @@ Todas as rotas são `GET`, para os dois perfis (a regra atual do `SecurityConfig
 ```json
 {
   "equipments": { "total": 150, "byStatus": { "OPERATIONAL": 134, "MALFUNCTION": 9, ... },
-                  "immediateMaintenance": 10, "overdueMaintenance": 3 },
+                  "immediateMaintenance": 10, "overdueMaintenance": 3, "upcomingMaintenance": 14 },
   "agents": { "total": 40, "active": 17, "byStatus": { "AVAILABLE": 11, ... } },
   "regions": [ { "region": "NORTH", "equipmentsInMalfunction": 4, "activeAgents": 2 }, ... ],
   "generatedAt": "2026-10-27T13:00:00Z"
 }
 ```
 
-**Alerta:** `kind`, `severity` (`HIGH` | `MEDIUM`), `message` (em português), `region`, `equipmentId` ou nulo, `since` ou nulo.
+**Alerta:** `kind`, `severity` (`HIGH` | `MEDIUM` | `LOW`), `message` (em português), `region`, `equipmentId` ou nulo, `since` ou nulo.
 
 > **Exceção à regra "listagem sempre paginada"** (ver Questões abertas): o `/map` devolve todos os pontos filtrados de uma vez, porque um mapa paginado não faz sentido. Há um teto fixo de 2.000 pontos por camada, e a resposta traz `truncated: true` se o teto for atingido. Hoje são cerca de 190 pontos.
 

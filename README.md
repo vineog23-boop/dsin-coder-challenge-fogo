@@ -39,9 +39,9 @@ Testes: `cd backend && ./mvnw test` (precisa de Docker, porque usa PostgreSQL re
 
 **Central de operações** (`/central`, Parte 2)
 - **Mapa da cidade:** os equipamentos têm um ícone por tipo e a borda na cor da situação; os agentes em atividade aparecem como círculo na cor da situação, na posição em campo ou, sem ela, na base. Clicar num marcador abre o resumo, com link para o detalhe.
-- **Indicadores:** equipamentos com falha, manutenção imediata, manutenção atrasada e agentes em atividade, mais uma tabela por região (falhas × agentes).
-- **Alertas calculados na hora:** equipamento com falha ou roubado, região sem agente em atividade e manutenção atrasada, ordenados por severidade e antiguidade.
-- **Filtros:** camadas, tipo, situação, região e órgão. Ficam na URL.
+- **Indicadores:** total de equipamentos, operacionais, indisponíveis (com falha, em manutenção ou roubados), percentual de disponibilidade (operacionais sobre os em uso, sem desativados e não instalados), agentes em atividade, equipamentos com falha, manutenção imediata, manutenção atrasada e manutenção nos próximos 7 dias. Mais uma tabela por região (falhas × agentes).
+- **Alertas calculados na hora:** equipamento com falha ou roubado e região sem agente em atividade (alta), manutenção atrasada (média) e manutenção prevista para os próximos 7 dias (baixa), ordenados por severidade e antiguidade.
+- **Filtros:** camadas, tipo, situação, região, órgão e bairro (lista com os bairros existentes). Ficam na URL.
 - **Atualização:** a cada 10 s, com pausa quando a aba fica oculta. Mudar um equipamento para "com falha" aparece na central em até 10 s.
 - **Telemetria simulada:** no compose, os agentes em serviço andam perto da base a cada 10 s (`APP_TELEMETRY_ENABLED`). Isso não grava histórico.
 
@@ -99,16 +99,39 @@ Specs, plano e decisões ficam em `.specs/`.
 
 ## Uso de IA
 
-O desafio pede que se declare quais IAs foram usadas e como.
+O desafio pede que se declare quais IAs foram usadas e que o autor mostre entender o que foi construído. Esta seção conta como o projeto foi conduzido.
 
-- **Claude Code (Anthropic, modelo Claude Opus):** usado do início ao fim no fluxo spec → plano → implementação por tarefas → revisão:
-  - **Specs e plano:** `.specs/features/*/spec.md`, `tasks.md` e `plan-parte-1.md` foram escritos com a IA e aprovados pelo autor antes de qualquer código.
-  - **Implementação:** feita pela IA tarefa a tarefa, seguindo as regras do projeto (`AGENTS.md`). Regras de negócio foram escritas em TDD: o teste primeiro, visto falhando, e depois o código.
-  - **Subagents do projeto (`.claude/agents/`):** `testador` escreveu os testes de controller, integração e front; `revisor` e `arquiteto` ficam disponíveis para revisão do diff e decisões de design.
-  - **Verificação:** a IA rodou testes, build e lint e conferiu as telas num navegador automatizado (Playwright), em largura de celular e de desktop, antes de cada commit. Cada commit foi aprovado pelo autor.
-- **O papel do autor:** escopo, decisões de arquitetura (herança `JOINED`, JWT, histórico desde a Parte 1, sem exclusão física), aprovação de specs, planos e commits.
+**IA usada:** Claude Code (Anthropic, modelo Claude Opus), em todas as etapas.
 
-> **Autor, confirme antes de entregar:** se usou outras IAs (ChatGPT, Gemini, Copilot etc.), acrescente aqui quais e para quê.
+### Por que spec-driven
+
+Com prazo curto e uma IA escrevendo boa parte do código, o maior risco é ela decidir sozinha: inventar regra, mudar contrato de API, fazer mais do que o pedido. Por isso o projeto seguiu um fluxo **spec-driven**: nenhuma linha de código antes de uma spec aprovada pelo autor. A spec é o contrato entre o autor e a IA, e é contra ela que cada entrega foi verificada.
+
+### Como o projeto foi conduzido
+
+1. **Regras antes do código.** O `AGENTS.md` define stack, arquitetura por feature, estilo de código, padrão de testes e limites. Os limites dizem o que a IA faz sozinha, o que precisa perguntar antes (dependência nova, contrato de API, schema) e o que nunca faz (apagar ou enfraquecer teste que falha, commitar segredo). Há regras por camada em `.claude/rules/` e três subagents em `.claude/agents/`: `arquiteto`, `revisor` e `testador`.
+2. **Decisões do autor, registradas.** Escopo, stack e modelagem saíram de uma entrevista e ficaram em `.specs/STATE.md`, cada uma com o motivo e o custo aceito. Exemplos: herança JPA `JOINED` em vez de JSONB, porque o autor consegue explicar e defender cada coluna; JWT com dois perfis; histórico gravado desde a Parte 1, já pensando na previsão.
+3. **Uma spec por feature.** `.specs/features/{auth,equipment,agent,operations}/spec.md` traz modelo, regras de negócio numeradas, rotas da API, critérios de aceite e o que fica fora do escopo. Cada spec foi aprovada antes do plano.
+4. **Plano em tarefas.** `.specs/plan-parte-1.md` (T1 a T22) e `.specs/plan-parte-2.md` (T23 a T28), com sete checkpoints (A a G). Cada checkpoint tem um critério verificável, por exemplo "login funciona no navegador com os dois perfis".
+5. **Implementação tarefa a tarefa.** A IA implementa a menor mudança que resolve a tarefa. Regras de negócio seguem TDD: o teste é escrito primeiro, visto falhando, e só então vem o código. Antes de qualquer tarefa ser dada como pronta, a IA roda testes, lint e build e confere as telas num navegador automatizado (Playwright), em largura de celular e de desktop. Com o prazo apertado, a partir de 26/10 as tarefas passaram a ser feitas em grupos até o próximo checkpoint, mantendo um commit por tarefa.
+6. **Aprovação do autor em cada passo.** Cada commit foi mostrado e aprovado. Mudança de contrato, de schema ou dependência nova só entrava depois de uma pergunta explícita. Exemplo: em 27/10, ao comparar o sistema com o enunciado, a IA apontou três lacunas na Parte 2 (indicadores de disponibilidade, filtro por bairro e destaque de manutenção próxima). O autor aprovou a mudança de contrato, e as lacunas foram fechadas com testes escritos antes do código.
+7. **Memória entre sessões.** O `.specs/STATE.md` guarda decisões, o ponto em que o trabalho parou e os cuidados descobertos no caminho, para cada sessão recomeçar de onde a anterior terminou, sem depender da memória da conversa.
+
+### Quem fez o quê
+
+| Autor | IA |
+|---|---|
+| Escopo e prioridades | Redigir specs e planos a partir das decisões do autor |
+| Decisões de arquitetura e seus custos | Implementar tarefa a tarefa, dentro das regras do `AGENTS.md` |
+| Aprovar specs, planos, commits e qualquer mudança de contrato | Escrever e rodar os testes, o lint, o build e a conferência no navegador |
+| Conferir o resultado contra o enunciado | Apontar riscos, lacunas e trade-offs antes de decidir |
+
+### Como conferir
+
+- As specs, os planos e as decisões estão em `.specs/`; as regras dadas à IA, em `AGENTS.md` e `.claude/`.
+- O `git log` mostra a evolução em commits pequenos, um assunto por commit, na ordem do plano.
+- Os 243 testes (183 no back-end e 60 no front-end) são a evidência de que cada regra da spec foi implementada.
+- O material de apresentação (slides e roteiro do vídeo) também foi produzido com o Claude Code, usando a ferramenta Mira, fora deste repositório.
 
 ## Roteiro do vídeo (≈ 4 min)
 
