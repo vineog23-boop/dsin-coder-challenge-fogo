@@ -19,6 +19,8 @@ services:
     build: ./backend
     environment:
       SPRING_PROFILES_ACTIVE: demo
+      # Telemetria simulada da central: agentes em serviço andam a cada 10 s (só demonstração).
+      APP_TELEMETRY_ENABLED: "true"
       DB_URL: jdbc:postgresql://db:5432/fogo
       DB_USERNAME: ${DB_USERNAME:-fogo}
       DB_PASSWORD: ${DB_PASSWORD:-fogo}
