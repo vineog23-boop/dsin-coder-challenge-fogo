@@ -54,6 +54,7 @@ import java.util.Set;
  *   <li>Tipo: radar e câmera ×{@value #EXPOSED_TYPE_FACTOR} (ficam na rua, expostos a chuva e vandalismo).</li>
  *   <li>Horário: {@value #NIGHT_SHARE} das falhas entre 18h e 23h (horário local); o resto em qualquer hora.</li>
  *   <li>Reparo: {@value #REPAIR_BACKLOG_SHARE} das falhas esperam de 3 a 15 dias na fila; as demais, até 24 h.</li>
+ *   <li>Preventiva: {@value #MISSED_PREVENTIVE_SHARE} das que venceram no último mês não foram feitas (manutenção atrasada).</li>
  * </ul>
  * Cada falha segue o ciclo OPERATIONAL → MALFUNCTION → UNDER_MAINTENANCE → manutenção corretiva → OPERATIONAL;
  * equipamentos com intervalo recebem manutenção preventiva periódica. Ciclos que não terminaram até hoje
@@ -71,7 +72,8 @@ public class DemoEquipmentSeeder implements ApplicationRunner {
     static final double EAST_FACTOR = 1.8;
     static final double EXPOSED_TYPE_FACTOR = 1.3;
     static final double NIGHT_SHARE = 0.6;
-    static final double REPAIR_BACKLOG_SHARE = 0.25;
+    static final double REPAIR_BACKLOG_SHARE = 0.35;
+    static final double MISSED_PREVENTIVE_SHARE = 0.15;
 
     private static final ZoneId CITY_ZONE = ZoneId.of("America/Sao_Paulo");
     private static final String OPERATOR = "gestor";
@@ -140,6 +142,10 @@ public class DemoEquipmentSeeder implements ApplicationRunner {
         while (true) {
             if (nextPreventive != null && nextPreventive.isBefore(nextFailure)) {
                 if (!nextPreventive.isBefore(now)) {
+                    break;
+                }
+                // Parte das preventivas do último mês fica esquecida: vira manutenção atrasada na central.
+                if (nextPreventive.isAfter(now.minus(30, ChronoUnit.DAYS)) && random.nextDouble() < MISSED_PREVENTIVE_SHARE) {
                     break;
                 }
                 registerMaintenance(equipment, MaintenanceKind.PREVENTIVE, nextPreventive, "Revisão periódica.");
