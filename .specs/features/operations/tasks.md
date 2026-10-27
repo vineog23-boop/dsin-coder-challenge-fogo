@@ -53,8 +53,8 @@ Projeções e `@Query` em `EquipmentRepository` e `AgentRepository`:
 
 `src/lib/api/operations.ts`, `src/lib/mapIcons.ts` (ícone por tipo, cor por situação, `L.divIcon`), `src/lib/usePolling.ts` (10 s, pausa com a aba oculta), `OperationsMap` (marcadores de equipamento e de agente com popup e link), `MapLegend` e filtros na URL. Rota `/central`.
 
-- [ ] Aceite: os 150 equipamentos e os agentes em atividade aparecem no mapa com ícone por tipo e cor por situação; o popup tem resumo e link para o detalhe.
-- [ ] Aceite: `equipmentStatus=MALFUNCTION&region=NORTH` filtra o mapa e fica na URL; o polling atualiza sem recarregar e mostra "atualizado há X s".
+- [x] Aceite: os 150 equipamentos e os agentes em atividade aparecem no mapa com ícone por tipo e cor por situação; o popup tem resumo e link para o detalhe.
+- [x] Aceite: `equipmentStatus=MALFUNCTION&region=NORTH` filtra o mapa e fica na URL; o polling atualiza sem recarregar e mostra "atualizado há X s".
 - Verificação: `mapIcons.test.ts`, `usePolling.test.ts`; lint e build; navegador (celular e desktop).
 - Arquivos: `src/lib/api/operations.ts`, `src/lib/mapIcons.ts`, `src/lib/usePolling.ts`, `src/components/OperationsMap.tsx`, `src/components/MapLegend.tsx`, `src/pages/OperationsPage.tsx`, testes.
 - Depende de: T23 (contrato do `/map`).
@@ -63,8 +63,8 @@ Projeções e `@Query` em `EquipmentRepository` e `AgentRepository`:
 
 `SummaryCards` (com falha, manutenção imediata, manutenção atrasada, agentes em atividade), `RegionTable`, `AlertList` (severidade, mensagem, tempo decorrido, link), todos no mesmo ciclo de polling.
 
-- [ ] Aceite: os cartões e a tabela batem com o `/summary`; os alertas aparecem com link para o detalhe.
-- [ ] Aceite: falha de rede mantém os últimos dados com aviso; com a lista vazia, aparece mensagem de "nenhum alerta".
+- [x] Aceite: os cartões e a tabela batem com o `/summary`; os alertas aparecem com link para o detalhe.
+- [x] Aceite: falha de rede mantém os últimos dados com aviso; com a lista vazia, aparece mensagem de "nenhum alerta".
 - Verificação: `OperationsPage.test.tsx` (mapa mockado: filtros na URL, cartões, alertas com link, erro mantém os dados); lint e build; navegador.
 - Arquivos: `src/components/SummaryCards.tsx`, `src/components/RegionTable.tsx`, `src/components/AlertList.tsx`, `src/pages/OperationsPage.tsx`, teste.
 - Depende de: T24, T26.
@@ -74,11 +74,11 @@ Projeções e `@Query` em `EquipmentRepository` e `AgentRepository`:
 
 `/central` vira a tela inicial (menu "Central · Equipamentos · Agentes"; redirecionamentos do login e de rota desconhecida). README: seção "Central", Swagger com as rotas novas e roteiro do vídeo atualizado.
 
-- [ ] Aceite: o login leva a `/central`; rota desconhecida também.
-- [ ] Aceite: do zero (`docker compose down -v && up --build`), a central abre com dados, e mudar um equipamento para falha aparece em até 10 s (marcador vermelho, indicador e alerta).
+- [x] Aceite: o login leva a `/central`; rota desconhecida também.
+- [x] Aceite: do zero (`docker compose down -v && up --build`), a central abre com dados, e mudar um equipamento para falha aparece em até 10 s (marcador vermelho, indicador e alerta).
 - Verificação: testes de rota existentes ajustados; `npm test`, lint e build; `./mvnw test`; roteiro manual no navegador.
 - Arquivos: `src/App.tsx`, `src/pages/LoginPage.tsx`, `README.md`.
 - Depende de: T27, T25.
 
 ### Checkpoint G
-- [ ] Todos os critérios de aceite da spec `operations` conferidos e marcados; `./mvnw test`, `npm test`, lint e build verdes.
+- [x] Todos os critérios de aceite da spec `operations` conferidos e marcados; `./mvnw test` (166), `npm test` (59), lint e build verdes.

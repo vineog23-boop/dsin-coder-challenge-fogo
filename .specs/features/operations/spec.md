@@ -149,14 +149,14 @@ public SummaryDtoResponse summary() {
 
 ## Critérios de aceite
 
-- [ ] Ao entrar, o usuário cai em `/central` e vê no mapa os 150 equipamentos e os agentes em atividade, com ícone por tipo e cor por situação.
-- [ ] Clicar num marcador abre um popup com o resumo e o link para o detalhe.
-- [ ] O filtro `equipmentStatus=MALFUNCTION&region=NORTH` mostra só esses equipamentos, e a URL guarda o filtro.
-- [ ] Os indicadores batem com o banco (conferidos por SQL): com falha, manutenção atrasada e agentes em atividade, no total e por região.
-- [ ] Mudar um equipamento para `MALFUNCTION` no detalhe faz, em até 10 s na central, o marcador ficar vermelho, o indicador subir e surgir um alerta `EQUIPMENT_MALFUNCTION` com "desde" correto.
-- [ ] Com a telemetria ligada, a posição de um agente em atividade muda entre duas atualizações, sem nova linha em `agent_status_history`.
-- [ ] O operador vê a central inteira, e sem token a resposta é `401`.
-- [ ] Na largura de celular (390 px) não há rolagem horizontal, e o mapa, os indicadores e os alertas são usáveis.
+- [x] Ao entrar, o usuário cai em `/central` e vê no mapa os 150 equipamentos e os agentes em atividade, com ícone por tipo e cor por situação.
+- [x] Clicar num marcador abre um popup com o resumo e o link para o detalhe.
+- [x] O filtro `equipmentStatus=MALFUNCTION&region=NORTH` mostra só esses equipamentos, e a URL guarda o filtro.
+- [x] Os indicadores batem com o banco (conferidos por SQL): com falha, manutenção atrasada e agentes em atividade, no total e por região.
+- [x] Mudar um equipamento para `MALFUNCTION` no detalhe faz, em até 10 s na central, o marcador ficar vermelho, o indicador subir e surgir um alerta `EQUIPMENT_MALFUNCTION` com "desde" correto.
+- [x] Com a telemetria ligada, a posição de um agente em atividade muda entre duas atualizações, sem nova linha em `agent_status_history`.
+- [x] O operador vê a central inteira, e sem token a resposta é `401`.
+- [x] Na largura de celular (390 px) não há rolagem horizontal, e o mapa, os indicadores e os alertas são usáveis.
 
 ## Fora do escopo
 
