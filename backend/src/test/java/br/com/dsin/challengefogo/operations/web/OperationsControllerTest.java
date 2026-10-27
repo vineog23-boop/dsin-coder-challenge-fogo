@@ -78,7 +78,7 @@ class OperationsControllerTest {
 
     private static SummaryDtoResponse summary() {
         return new SummaryDtoResponse(
-                new SummaryDtoResponse.EquipmentSummary(10, Map.of(EquipmentStatus.MALFUNCTION, 3L), 1, 2),
+                new SummaryDtoResponse.EquipmentSummary(10, Map.of(EquipmentStatus.MALFUNCTION, 3L), 1, 2, 4),
                 new SummaryDtoResponse.AgentSummary(5, 4, Map.of(AgentStatus.AVAILABLE, 4L)),
                 List.of(new SummaryDtoResponse.RegionSummary(Region.NORTH, 3, 2)),
                 Instant.parse("2026-01-01T10:00:00Z"));
@@ -119,6 +119,7 @@ class OperationsControllerTest {
         mockMvc.perform(get(BASE + "/summary").with(gestor()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.equipments.byStatus.MALFUNCTION").value(3))
+                .andExpect(jsonPath("$.equipments.upcomingMaintenance").value(4))
                 .andExpect(jsonPath("$.agents.active").value(4))
                 .andExpect(jsonPath("$.regions[0].region").value("NORTH"))
                 .andExpect(jsonPath("$.generatedAt").exists());
@@ -146,13 +147,14 @@ class OperationsControllerTest {
                         .param("agentStatus", "OFF_DUTY")
                         .param("region", "NORTH")
                         .param("agency", "MUNICIPAL_TRAFFIC")
+                        .param("neighborhood", "Vila Marcondes")
                         .with(gestor()))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<MapFilter> captor = ArgumentCaptor.forClass(MapFilter.class);
         verify(operationsService).map(captor.capture());
         assertThat(captor.getValue()).isEqualTo(new MapFilter(EquipmentType.RADAR, EquipmentStatus.MALFUNCTION,
-                AgentStatus.OFF_DUTY, Region.NORTH, Agency.MUNICIPAL_TRAFFIC));
+                AgentStatus.OFF_DUTY, Region.NORTH, Agency.MUNICIPAL_TRAFFIC, "Vila Marcondes"));
     }
 
     @Test
@@ -163,7 +165,21 @@ class OperationsControllerTest {
 
         ArgumentCaptor<MapFilter> captor = ArgumentCaptor.forClass(MapFilter.class);
         verify(operationsService).map(captor.capture());
-        assertThat(captor.getValue()).isEqualTo(new MapFilter(null, null, null, null, null));
+        assertThat(captor.getValue()).isEqualTo(new MapFilter(null, null, null, null, null, null));
+    }
+
+    @Test
+    void deveListarBairrosParaOOperadorQuandoConsulta() throws Exception {
+        when(operationsService.neighborhoods()).thenReturn(List.of("Centro", "Vila Marcondes"));
+
+        mockMvc.perform(get(BASE + "/neighborhoods").with(operador()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1]").value("Vila Marcondes"));
+    }
+
+    @Test
+    void naoDeveListarBairrosQuandoSemLogin() throws Exception {
+        mockMvc.perform(get(BASE + "/neighborhoods")).andExpect(status().isUnauthorized());
     }
 
     @Test

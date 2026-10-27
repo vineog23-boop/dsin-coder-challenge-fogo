@@ -35,6 +35,7 @@ class AlertServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-10-26T15:00:00Z");
     private static final LocalDate TODAY = LocalDate.of(2026, 10, 26);
+    private static final LocalDate IN_A_WEEK = LocalDate.of(2026, 11, 2);
 
     private final EquipmentRepository equipmentRepository = mock(EquipmentRepository.class);
     private final EquipmentStatusHistoryRepository historyRepository = mock(EquipmentStatusHistoryRepository.class);
@@ -57,7 +58,7 @@ class AlertServiceTest {
 
     @Test
     void deveOrdenarPorSeveridadeEDepoisPeloMaisAntigo() {
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of(
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
                 candidate(overdue, "CAN-1", EquipmentStatus.OPERATIONAL, MaintenanceNeed.SCHEDULED,
                         LocalDate.of(2026, 10, 20), Region.SOUTH),
                 candidate(recentFailure, "RAD-2", EquipmentStatus.MALFUNCTION, MaintenanceNeed.IMMEDIATE, null,
@@ -83,7 +84,7 @@ class AlertServiceTest {
 
     @Test
     void deveMontarAlertaDeFalhaComDesdeERegiao() {
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of(
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
                 candidate(oldFailure, "RAD-1", EquipmentStatus.MALFUNCTION, MaintenanceNeed.IMMEDIATE, null,
                         Region.NORTH)));
         when(historyRepository.findLastEntryInto(eq(EquipmentStatus.MALFUNCTION), any())).thenReturn(List.of(
@@ -99,7 +100,7 @@ class AlertServiceTest {
 
     @Test
     void deveUsarDataDaManutencaoComoDesdeQuandoAtrasada() {
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of(
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
                 candidate(overdue, "CAN-1", EquipmentStatus.OPERATIONAL, MaintenanceNeed.SCHEDULED,
                         LocalDate.of(2026, 10, 20), Region.SOUTH)));
 
@@ -112,7 +113,7 @@ class AlertServiceTest {
 
     @Test
     void deveGerarDoisAlertasQuandoEquipamentoComFalhaTambemEstaComManutencaoAtrasada() {
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of(
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
                 candidate(oldFailure, "RAD-1", EquipmentStatus.MALFUNCTION, MaintenanceNeed.SCHEDULED,
                         LocalDate.of(2026, 10, 10), Region.NORTH)));
 
@@ -127,7 +128,7 @@ class AlertServiceTest {
         when(agentRepository.countByRegionWithStatusIn(OperationsService.ACTIVE_AGENTS)).thenReturn(List.of(
                 new RegionCount(Region.CENTER, 2), new RegionCount(Region.SOUTH, 1), new RegionCount(Region.EAST, 3),
                 new RegionCount(Region.WEST, 1)));
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of(
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
                 candidate(oldFailure, "RAD-1", EquipmentStatus.MALFUNCTION, MaintenanceNeed.IMMEDIATE, null,
                         Region.NORTH)));
         when(historyRepository.findLastEntryInto(eq(EquipmentStatus.MALFUNCTION), any())).thenReturn(List.of(
@@ -143,8 +144,39 @@ class AlertServiceTest {
     }
 
     @Test
+    void deveAlertarManutencaoProximaComSeveridadeBaixaDepoisDasAtrasadasQuandoVenceEmAteSeteDias() {
+        UUID dueSoon = UUID.randomUUID();
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
+                candidate(dueSoon, "CAN-9", EquipmentStatus.OPERATIONAL, MaintenanceNeed.SCHEDULED,
+                        LocalDate.of(2026, 10, 30), Region.WEST),
+                candidate(overdue, "CAN-1", EquipmentStatus.OPERATIONAL, MaintenanceNeed.SCHEDULED,
+                        LocalDate.of(2026, 10, 20), Region.SOUTH)));
+
+        List<AlertDtoResponse> alerts = service.alerts(PageRequest.of(0, 20)).getContent();
+
+        assertThat(alerts).extracting(AlertDtoResponse::kind)
+                .containsExactly(Kind.MAINTENANCE_OVERDUE, Kind.MAINTENANCE_DUE_SOON);
+        AlertDtoResponse soon = alerts.get(1);
+        assertThat(soon.severity()).isEqualTo(Severity.LOW);
+        assertThat(soon.equipmentId()).isEqualTo(dueSoon);
+        assertThat(soon.since()).isNull();
+        assertThat(soon.message()).contains("CAN-9").contains("30/10/2026");
+    }
+
+    @Test
+    void naoDeveAlertarManutencaoProximaQuandoEquipamentoEstaDesativado() {
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
+                candidate(UUID.randomUUID(), "CAN-9", EquipmentStatus.DEACTIVATED, MaintenanceNeed.SCHEDULED,
+                        LocalDate.of(2026, 10, 30), Region.WEST)));
+
+        Page<AlertDtoResponse> alerts = service.alerts(PageRequest.of(0, 20));
+
+        assertThat(alerts.getTotalElements()).isZero();
+    }
+
+    @Test
     void naoDeveGerarAlertaQuandoNaoHaCandidatosETodasRegioesTemAgente() {
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of());
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of());
 
         Page<AlertDtoResponse> alerts = service.alerts(PageRequest.of(0, 20));
 
@@ -153,7 +185,7 @@ class AlertServiceTest {
 
     @Test
     void devePaginarAlertasQuandoHaMaisQueOTamanhoDaPagina() {
-        when(equipmentRepository.findAlertCandidates(TODAY)).thenReturn(List.of(
+        when(equipmentRepository.findAlertCandidates(IN_A_WEEK)).thenReturn(List.of(
                 candidate(UUID.randomUUID(), "CAN-1", EquipmentStatus.OPERATIONAL, MaintenanceNeed.SCHEDULED,
                         LocalDate.of(2026, 10, 1), Region.SOUTH),
                 candidate(UUID.randomUUID(), "CAN-2", EquipmentStatus.OPERATIONAL, MaintenanceNeed.SCHEDULED,

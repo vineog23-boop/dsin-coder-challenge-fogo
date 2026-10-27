@@ -7,9 +7,10 @@ import br.com.dsin.challengefogo.shared.domain.Agency;
 import br.com.dsin.challengefogo.shared.domain.Region;
 
 /**
- * Filtros do mapa, vindos da query string. {@code region} e {@code agency} valem para as duas camadas;
- * sem {@code agentStatus}, o mapa mostra só os agentes em atividade (regra 2).
+ * Filtros do mapa, vindos da query string. {@code region}, {@code agency} e {@code neighborhood} valem para as
+ * duas camadas (no agente, o bairro é o da base); sem {@code agentStatus}, o mapa mostra só os agentes em
+ * atividade (regra 2).
  */
 public record MapFilter(EquipmentType equipmentType, EquipmentStatus equipmentStatus, AgentStatus agentStatus,
-                        Region region, Agency agency) {
+                        Region region, Agency agency, String neighborhood) {
 }

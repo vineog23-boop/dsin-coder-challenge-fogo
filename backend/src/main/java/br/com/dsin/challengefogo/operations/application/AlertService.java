@@ -85,7 +85,8 @@ public class AlertService {
     }
 
     private List<AlertDtoResponse> equipmentAlerts(LocalDate today) {
-        List<EquipmentAlertView> candidates = equipmentRepository.findAlertCandidates(today);
+        List<EquipmentAlertView> candidates = equipmentRepository.findAlertCandidates(
+                today.plusDays(OperationsService.UPCOMING_MAINTENANCE_DAYS));
         Map<UUID, Instant> malfunctionSince = lastEntryInto(EquipmentStatus.MALFUNCTION, candidates);
         Map<UUID, Instant> stolenSince = lastEntryInto(EquipmentStatus.STOLEN, candidates);
         List<AlertDtoResponse> alerts = new ArrayList<>();
@@ -106,6 +107,12 @@ public class AlertService {
                                 + DATE.format(equipment.nextMaintenanceDate()) + ".",
                         equipment.nextMaintenanceDate().atStartOfDay(OperationsService.CITY_ZONE).toInstant()));
             }
+            if (isDueSoon(equipment, today)) {
+                // Sem "desde": ainda não aconteceu; a data prevista vai na mensagem.
+                alerts.add(equipmentAlert(Kind.MAINTENANCE_DUE_SOON, Severity.LOW, equipment,
+                        "Manutenção do equipamento " + equipment.serialNumber() + " prevista para "
+                                + DATE.format(equipment.nextMaintenanceDate()) + ".", null));
+            }
         }
         return alerts;
     }
@@ -114,6 +121,13 @@ public class AlertService {
     private static boolean isOverdue(EquipmentAlertView equipment, LocalDate today) {
         return equipment.maintenanceNeed() == MaintenanceNeed.SCHEDULED && equipment.nextMaintenanceDate() != null
                 && equipment.nextMaintenanceDate().isBefore(today)
+                && equipment.status() != EquipmentStatus.DEACTIVATED;
+    }
+
+    /** Agendada, vencendo de hoje até o fim da janela e em uso: dá tempo de preparar a equipe. */
+    private static boolean isDueSoon(EquipmentAlertView equipment, LocalDate today) {
+        return equipment.maintenanceNeed() == MaintenanceNeed.SCHEDULED && equipment.nextMaintenanceDate() != null
+                && !equipment.nextMaintenanceDate().isBefore(today)
                 && equipment.status() != EquipmentStatus.DEACTIVATED;
     }
 

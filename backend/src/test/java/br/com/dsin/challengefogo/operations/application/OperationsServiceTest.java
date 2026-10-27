@@ -61,6 +61,8 @@ class OperationsServiceTest {
                 new EquipmentStatusCount(EquipmentStatus.MALFUNCTION, 3)));
         when(equipmentRepository.countByMaintenanceNeed(MaintenanceNeed.IMMEDIATE)).thenReturn(4L);
         when(equipmentRepository.countOverdueMaintenance(LocalDate.of(2026, 10, 26))).thenReturn(2L);
+        when(equipmentRepository.countUpcomingMaintenance(LocalDate.of(2026, 10, 26), LocalDate.of(2026, 11, 2)))
+                .thenReturn(5L);
         when(equipmentRepository.countByRegionWithStatus(EquipmentStatus.MALFUNCTION))
                 .thenReturn(List.of(new RegionCount(Region.NORTH, 3)));
         when(agentRepository.countByStatus()).thenReturn(List.of(
@@ -77,6 +79,7 @@ class OperationsServiceTest {
                 .containsEntry(EquipmentStatus.STOLEN, 0L).containsEntry(EquipmentStatus.MALFUNCTION, 3L);
         assertThat(summary.equipments().immediateMaintenance()).isEqualTo(4);
         assertThat(summary.equipments().overdueMaintenance()).isEqualTo(2);
+        assertThat(summary.equipments().upcomingMaintenance()).isEqualTo(5);
         assertThat(summary.agents().total()).isEqualTo(13);
         assertThat(summary.agents().active()).isEqualTo(7);
         assertThat(summary.agents().byStatus()).containsEntry(AgentStatus.ON_LEAVE, 0L);
@@ -93,7 +96,7 @@ class OperationsServiceTest {
 
     @Test
     void deveUsarPosicaoAtualQuandoAgenteTemPosicao() {
-        when(agentRepository.findMarkers(any(), any(), any(), any())).thenReturn(List.of(agent(true)));
+        when(agentRepository.findMarkers(any(), any(), any(), any(), any())).thenReturn(List.of(agent(true)));
 
         AgentMarkerDto marker = service.map(emptyFilter()).agents().getFirst();
 
@@ -104,7 +107,7 @@ class OperationsServiceTest {
 
     @Test
     void deveUsarBaseQuandoAgenteNaoTemPosicao() {
-        when(agentRepository.findMarkers(any(), any(), any(), any())).thenReturn(List.of(agent(false)));
+        when(agentRepository.findMarkers(any(), any(), any(), any(), any())).thenReturn(List.of(agent(false)));
 
         AgentMarkerDto marker = service.map(emptyFilter()).agents().getFirst();
 
@@ -117,27 +120,48 @@ class OperationsServiceTest {
     void deveBuscarSoAgentesEmAtividadeQuandoSemFiltroDeSituacao() {
         service.map(emptyFilter());
 
-        verify(agentRepository).findMarkers(eq(ACTIVE), isNull(), isNull(), eq(Limit.of(OperationsService.MARKER_LIMIT + 1)));
+        verify(agentRepository).findMarkers(eq(ACTIVE), isNull(), isNull(), isNull(),
+                eq(Limit.of(OperationsService.MARKER_LIMIT + 1)));
     }
 
     @Test
     void deveRepassarFiltrosQuandoInformados() {
         MapFilter filter = new MapFilter(EquipmentType.RADAR, EquipmentStatus.MALFUNCTION, AgentStatus.OFF_DUTY,
-                Region.NORTH, Agency.MUNICIPAL_TRAFFIC);
+                Region.NORTH, Agency.MUNICIPAL_TRAFFIC, "  Vila Marcondes ");
 
         service.map(filter);
 
         verify(equipmentRepository).findMarkers(EquipmentType.RADAR, EquipmentStatus.MALFUNCTION, Region.NORTH,
-                Agency.MUNICIPAL_TRAFFIC, Limit.of(OperationsService.MARKER_LIMIT + 1));
+                Agency.MUNICIPAL_TRAFFIC, "vila marcondes", Limit.of(OperationsService.MARKER_LIMIT + 1));
         verify(agentRepository).findMarkers(Set.of(AgentStatus.OFF_DUTY), Region.NORTH, Agency.MUNICIPAL_TRAFFIC,
-                Limit.of(OperationsService.MARKER_LIMIT + 1));
+                "vila marcondes", Limit.of(OperationsService.MARKER_LIMIT + 1));
+    }
+
+    @Test
+    void deveIgnorarBairroQuandoVemEmBranco() {
+        service.map(new MapFilter(null, null, null, null, null, "   "));
+
+        verify(equipmentRepository).findMarkers(isNull(), isNull(), isNull(), isNull(), isNull(),
+                eq(Limit.of(OperationsService.MARKER_LIMIT + 1)));
+    }
+
+    // ---------- bairros (filtro do mapa) ----------
+
+    @Test
+    void deveListarBairrosDeEquipamentosEBasesSemRepeticaoEmOrdemQuandoConsulta() {
+        when(equipmentRepository.findNeighborhoods()).thenReturn(List.of("Vila Marcondes", "Centro"));
+        when(agentRepository.findBaseNeighborhoods()).thenReturn(List.of("Centro", "Ana Jacinta"));
+
+        List<String> neighborhoods = service.neighborhoods();
+
+        assertThat(neighborhoods).containsExactly("Ana Jacinta", "Centro", "Vila Marcondes");
     }
 
     @Test
     void deveAvisarECortarQuandoCamadaPassaDoTeto() {
         EquipmentMarkerView marker = new EquipmentMarkerView(UUID.randomUUID(), EquipmentType.RADAR, "RAD-1",
                 EquipmentStatus.OPERATIONAL, MaintenanceNeed.NONE, BigDecimal.ONE, BigDecimal.ONE, Region.CENTER);
-        when(equipmentRepository.findMarkers(any(), any(), any(), any(), any()))
+        when(equipmentRepository.findMarkers(any(), any(), any(), any(), any(), any()))
                 .thenReturn(Collections.nCopies(OperationsService.MARKER_LIMIT + 1, marker));
 
         MapDtoResponse map = service.map(emptyFilter());
@@ -154,7 +178,7 @@ class OperationsServiceTest {
     }
 
     private static MapFilter emptyFilter() {
-        return new MapFilter(null, null, null, null, null);
+        return new MapFilter(null, null, null, null, null, null);
     }
 
     private static AgentMarkerView agent(boolean withPosition) {

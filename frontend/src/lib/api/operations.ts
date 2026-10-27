@@ -47,17 +47,24 @@ export type Summary = {
     byStatus: Record<EquipmentStatus, number>
     immediateMaintenance: number
     overdueMaintenance: number
+    /** Agendada vencendo de hoje até 7 dias. */
+    upcomingMaintenance: number
   }
   agents: { total: number; active: number; byStatus: Record<AgentStatus, number> }
   regions: { region: Region; equipmentsInMalfunction: number; activeAgents: number }[]
   generatedAt: string
 }
 
-export type AlertKind = 'EQUIPMENT_MALFUNCTION' | 'EQUIPMENT_STOLEN' | 'REGION_WITHOUT_ACTIVE_AGENT' | 'MAINTENANCE_OVERDUE'
+export type AlertKind =
+  | 'EQUIPMENT_MALFUNCTION'
+  | 'EQUIPMENT_STOLEN'
+  | 'REGION_WITHOUT_ACTIVE_AGENT'
+  | 'MAINTENANCE_OVERDUE'
+  | 'MAINTENANCE_DUE_SOON'
 
 export type Alert = {
   kind: AlertKind
-  severity: 'HIGH' | 'MEDIUM'
+  severity: 'HIGH' | 'MEDIUM' | 'LOW'
   message: string
   region: Region
   equipmentId: string | null
@@ -71,6 +78,8 @@ export type MapFilters = {
   agentStatus?: AgentStatus
   region?: Region
   agency?: Agency
+  /** Comparado sem diferenciar maiúsculas; no agente, vale o bairro da base. */
+  neighborhood?: string
 }
 
 export function getMap(filters: MapFilters): Promise<MapData> {
@@ -84,6 +93,11 @@ export function getMap(filters: MapFilters): Promise<MapData> {
 
 export function getSummary(): Promise<Summary> {
   return api<Summary>('/operations/summary')
+}
+
+/** Bairros que existem nos dados, para o filtro do mapa. */
+export function getNeighborhoods(): Promise<string[]> {
+  return api<string[]>('/operations/neighborhoods')
 }
 
 export function getAlerts(size = 50): Promise<Page<Alert>> {

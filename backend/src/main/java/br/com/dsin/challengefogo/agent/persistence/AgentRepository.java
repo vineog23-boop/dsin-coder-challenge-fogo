@@ -43,8 +43,13 @@ public interface AgentRepository extends JpaRepository<AgentEntity, UUID>, JpaSp
             + "a.baseLocation.longitude, a.baseLocation.region, v.licensePlate) "
             + "from AgentEntity a left join a.vehicle v where a.status in :statuses "
             + "and (:region is null or a.baseLocation.region = :region) and (:agency is null or a.agency = :agency) "
+            + "and (:neighborhood is null or lower(a.baseLocation.neighborhood) = :neighborhood) "
             + "order by a.name")
-    List<AgentMarkerView> findMarkers(Collection<AgentStatus> statuses, Region region, Agency agency, Limit limit);
+    List<AgentMarkerView> findMarkers(Collection<AgentStatus> statuses, Region region, Agency agency,
+                                      String neighborhood, Limit limit);
+
+    @Query("select distinct a.baseLocation.neighborhood from AgentEntity a where a.baseLocation.neighborhood is not null")
+    List<String> findBaseNeighborhoods();
 
     /** Agentes que a telemetria simulada move. */
     List<AgentEntity> findByStatusIn(Collection<AgentStatus> statuses);

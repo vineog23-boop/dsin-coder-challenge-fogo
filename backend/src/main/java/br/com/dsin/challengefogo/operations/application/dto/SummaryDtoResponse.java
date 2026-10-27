@@ -12,8 +12,9 @@ import java.util.Map;
 public record SummaryDtoResponse(EquipmentSummary equipments, AgentSummary agents, List<RegionSummary> regions,
                                  Instant generatedAt) {
 
+    /** {@code upcomingMaintenance}: agendada vencendo nos próximos dias (janela em {@code OperationsService}). */
     public record EquipmentSummary(long total, Map<EquipmentStatus, Long> byStatus, long immediateMaintenance,
-                                   long overdueMaintenance) {
+                                   long overdueMaintenance, long upcomingMaintenance) {
     }
 
     /** {@code active} = disponíveis + em ocorrência (regra 4). */

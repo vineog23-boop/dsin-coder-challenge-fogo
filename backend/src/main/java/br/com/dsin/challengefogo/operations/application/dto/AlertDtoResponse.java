@@ -17,12 +17,14 @@ public record AlertDtoResponse(Kind kind, Severity severity, String message, Reg
         EQUIPMENT_MALFUNCTION,
         EQUIPMENT_STOLEN,
         REGION_WITHOUT_ACTIVE_AGENT,
-        MAINTENANCE_OVERDUE
+        MAINTENANCE_OVERDUE,
+        MAINTENANCE_DUE_SOON
     }
 
     /** A ordem das constantes é a ordem de exibição: alta primeiro. */
     public enum Severity {
         HIGH,
-        MEDIUM
+        MEDIUM,
+        LOW
     }
 }

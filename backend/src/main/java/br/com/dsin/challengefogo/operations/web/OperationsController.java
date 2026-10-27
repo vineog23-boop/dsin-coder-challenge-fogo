@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /** Central de operações: só leitura, para os dois perfis (regra de {@code GET /api/**} do {@code SecurityConfig}). */
 @RestController
 @RequestMapping("/api/operations")
@@ -34,6 +36,11 @@ public class OperationsController {
     @GetMapping("/map")
     public MapDtoResponse map(MapFilter filter) {
         return operationsService.map(filter);
+    }
+
+    @GetMapping("/neighborhoods")
+    public List<String> neighborhoods() {
+        return operationsService.neighborhoods();
     }
 
     @GetMapping("/alerts")

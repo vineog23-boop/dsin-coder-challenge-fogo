@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import AlertList from '../components/AlertList'
 import MapLegend from '../components/MapLegend'
@@ -7,11 +7,11 @@ import OperationsMap from '../components/OperationsMap'
 import RegionTable from '../components/RegionTable'
 import SummaryCards from '../components/SummaryCards'
 import UpdatedAgo from '../components/UpdatedAgo'
-import { getAlerts, getMap, getSummary, type MapFilters } from '../lib/api/operations'
+import { getAlerts, getMap, getNeighborhoods, getSummary, type MapFilters } from '../lib/api/operations'
 import { usePolling } from '../lib/usePolling'
 
 const REFRESH_MS = 10_000
-const FILTER_KEYS = ['equipmentType', 'equipmentStatus', 'agentStatus', 'region', 'agency'] as const
+const FILTER_KEYS = ['equipmentType', 'equipmentStatus', 'agentStatus', 'region', 'agency', 'neighborhood'] as const
 
 /** Só os filtros que vão à API, numa string estável: mudar camada não refaz a busca. */
 function apiFilterQuery(params: URLSearchParams): string {
@@ -39,6 +39,20 @@ export default function OperationsPage() {
     return () => Promise.all([getMap(filters), getSummary(), getAlerts()])
   }, [filtersQuery])
   const { data, error, updatedAt } = usePolling(fetcher, REFRESH_MS)
+
+  // A lista de bairros muda pouco: busca uma vez. Se falhar, o filtro só fica sem opções.
+  const [neighborhoods, setNeighborhoods] = useState<string[]>([])
+  useEffect(() => {
+    let active = true
+    getNeighborhoods()
+      .then((names) => {
+        if (active) setNeighborhoods(names)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
 
   const changeFilters = useCallback(
     (next: OperationsFilterValues) => {
@@ -72,7 +86,7 @@ export default function OperationsPage() {
 
       {summary && <SummaryCards summary={summary} />}
 
-      <OperationsFilters values={values} onChange={changeFilters} />
+      <OperationsFilters values={values} neighborhoods={neighborhoods} onChange={changeFilters} />
 
       {map && (
         <div className="operations-grid">

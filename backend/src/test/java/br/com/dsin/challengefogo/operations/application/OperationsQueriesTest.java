@@ -81,10 +81,10 @@ class OperationsQueriesTest {
                 TODAY, Region.EAST));
         VehicleEntity car = equipmentRepository.save(new VehicleEntity(EquipmentType.MUNICIPAL_GUARD_VEHICLE, "VEI-1",
                 "Marca", "V1", Agency.MUNICIPAL_GUARD, EquipmentStatus.OPERATIONAL, MaintenanceNeed.NONE, null, null,
-                location(Region.CENTER), "GMA1B23", 4, false));
+                location(Region.CENTER, "Vila Marcondes"), "GMA1B23", 4, false));
 
         AgentEntity withPosition = new AgentEntity("Ana", "GM-1", AgentType.MUNICIPAL_GUARD, AgentStatus.AVAILABLE,
-                location(Region.CENTER), car);
+                location(Region.CENTER, "Vila Marcondes"), car);
         withPosition.updatePosition(new BigDecimal("-22.100000"), new BigDecimal("-51.300000"),
                 Instant.parse("2026-10-26T12:00:00Z"));
         agentRepository.save(withPosition);
@@ -123,6 +123,13 @@ class OperationsQueriesTest {
     }
 
     @Test
+    void deveContarManutencaoQueVenceDeHojeAteOLimiteQuandoConsultaProxima() {
+        long upcoming = equipmentRepository.countUpcomingMaintenance(TODAY, TODAY.plusDays(7));
+
+        assertThat(upcoming).isEqualTo(1); // CAN-3 vence hoje; CAN-1 já está atrasada e CAN-2 desativada
+    }
+
+    @Test
     void deveAgruparFalhasEAgentesEmAtividadePorRegiao() {
         List<RegionCount> failures = equipmentRepository.countByRegionWithStatus(EquipmentStatus.MALFUNCTION);
         List<RegionCount> activeAgents = agentRepository.countByRegionWithStatusIn(ACTIVE);
@@ -137,10 +144,10 @@ class OperationsQueriesTest {
 
     @Test
     void deveFiltrarMarcadoresDeEquipamentoQuandoCombinaFiltros() {
-        List<EquipmentMarkerView> all = equipmentRepository.findMarkers(null, null, null, null, Limit.of(100));
+        List<EquipmentMarkerView> all = equipmentRepository.findMarkers(null, null, null, null, null, Limit.of(100));
         List<EquipmentMarkerView> filtered = equipmentRepository.findMarkers(EquipmentType.RADAR,
-                EquipmentStatus.MALFUNCTION, Region.NORTH, Agency.MUNICIPAL_TRAFFIC, Limit.of(100));
-        List<EquipmentMarkerView> limited = equipmentRepository.findMarkers(null, null, null, null, Limit.of(2));
+                EquipmentStatus.MALFUNCTION, Region.NORTH, Agency.MUNICIPAL_TRAFFIC, null, Limit.of(100));
+        List<EquipmentMarkerView> limited = equipmentRepository.findMarkers(null, null, null, null, null, Limit.of(2));
 
         assertThat(all).hasSize(6);
         assertThat(filtered).extracting(EquipmentMarkerView::serialNumber).containsExactly("RAD-1");
@@ -150,9 +157,9 @@ class OperationsQueriesTest {
 
     @Test
     void deveTrazerMarcadoresDeAgenteComBasePosicaoEPlacaQuandoFiltraPorSituacao() {
-        List<AgentMarkerView> active = agentRepository.findMarkers(ACTIVE, null, null, Limit.of(100));
+        List<AgentMarkerView> active = agentRepository.findMarkers(ACTIVE, null, null, null, Limit.of(100));
         List<AgentMarkerView> northGuard = agentRepository.findMarkers(EnumSet.allOf(AgentStatus.class), Region.NORTH,
-                Agency.MILITARY_POLICE, Limit.of(100));
+                Agency.MILITARY_POLICE, null, Limit.of(100));
 
         assertThat(active).extracting(AgentMarkerView::name).containsExactly("Ana", "Bruno");
         AgentMarkerView ana = active.getFirst();
@@ -165,17 +172,38 @@ class OperationsQueriesTest {
 
     @Test
     void deveTrazerCandidatosAAlertaEUltimaEntradaEmFalha() {
-        List<EquipmentAlertView> candidates = equipmentRepository.findAlertCandidates(TODAY);
+        List<EquipmentAlertView> candidates = equipmentRepository.findAlertCandidates(TODAY.plusDays(7));
         List<StatusSinceView> since = historyRepository.findLastEntryInto(EquipmentStatus.MALFUNCTION,
                 List.of(brokenNorth.getId(), overdueSouth.getId()));
 
-        assertThat(candidates).extracting(EquipmentAlertView::serialNumber).containsExactlyInAnyOrder("RAD-1", "CAN-1");
+        assertThat(candidates).extracting(EquipmentAlertView::serialNumber).containsExactlyInAnyOrder("RAD-1", "CAN-1", "CAN-3");
         assertThat(since).containsExactly(new StatusSinceView(brokenNorth.getId(),
                 Instant.parse("2026-10-20T22:00:00Z")));
     }
 
+    @Test
+    void deveFiltrarMarcadoresPorBairroSemDiferenciarMaiusculasQuandoInformado() {
+        List<EquipmentMarkerView> equipments = equipmentRepository.findMarkers(null, null, null, null,
+                "vila marcondes", Limit.of(100));
+        List<AgentMarkerView> agents = agentRepository.findMarkers(EnumSet.allOf(AgentStatus.class), null, null,
+                "vila marcondes", Limit.of(100));
+
+        assertThat(equipments).extracting(EquipmentMarkerView::serialNumber).containsExactly("VEI-1");
+        assertThat(agents).extracting(AgentMarkerView::name).containsExactly("Ana");
+    }
+
+    @Test
+    void deveListarBairrosDistintosDeEquipamentosEDeBasesQuandoConsulta() {
+        assertThat(equipmentRepository.findNeighborhoods()).containsExactlyInAnyOrder("Centro", "Vila Marcondes");
+        assertThat(agentRepository.findBaseNeighborhoods()).containsExactlyInAnyOrder("Centro", "Vila Marcondes");
+    }
+
     private static Location location(Region region) {
-        return new Location("19010000", "Rua A", null, "Centro", "Presidente Prudente", "SP", region,
+        return location(region, "Centro");
+    }
+
+    private static Location location(Region region, String neighborhood) {
+        return new Location("19010000", "Rua A", null, neighborhood, "Presidente Prudente", "SP", region,
                 new BigDecimal("-22.125600"), new BigDecimal("-51.388900"));
     }
 

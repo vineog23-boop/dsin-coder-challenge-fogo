@@ -7,7 +7,7 @@ type Props = {
   total: number
 }
 
-const SEVERITY_LABEL = { HIGH: 'Alta', MEDIUM: 'Média' } as const
+const SEVERITY_LABEL = { HIGH: 'Alta', MEDIUM: 'Média', LOW: 'Baixa' } as const
 
 /** Alertas na ordem da API (severidade e depois o mais antigo); cada um leva ao que precisa de ação. */
 export default function AlertList({ alerts, total }: Props) {

@@ -29,8 +29,10 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /** Leituras da central: tudo derivado da Parte 1, sem tabela própria. */
 @Service
@@ -39,6 +41,8 @@ public class OperationsService {
     /** Teto por camada do mapa (exceção aprovada à paginação: um mapa paginado não faz sentido). */
     static final int MARKER_LIMIT = 2_000;
     static final ZoneId CITY_ZONE = ZoneId.of("America/Sao_Paulo");
+    /** Janela da "manutenção próxima": vence de hoje até daqui a uma semana. */
+    static final int UPCOMING_MAINTENANCE_DAYS = 7;
     /** Agentes em atividade: disponíveis + em ocorrência (regra 4). */
     static final Set<AgentStatus> ACTIVE_AGENTS = Collections.unmodifiableSet(
             EnumSet.of(AgentStatus.AVAILABLE, AgentStatus.ON_OCCURRENCE));
@@ -73,7 +77,9 @@ public class OperationsService {
         return new SummaryDtoResponse(
                 new EquipmentSummary(sum(equipmentsByStatus), equipmentsByStatus,
                         equipmentRepository.countByMaintenanceNeed(MaintenanceNeed.IMMEDIATE),
-                        equipmentRepository.countOverdueMaintenance(today)),
+                        equipmentRepository.countOverdueMaintenance(today),
+                        equipmentRepository.countUpcomingMaintenance(today,
+                                today.plusDays(UPCOMING_MAINTENANCE_DAYS))),
                 new AgentSummary(sum(agentsByStatus),
                         ACTIVE_AGENTS.stream().mapToLong(agentsByStatus::get).sum(), agentsByStatus),
                 regions,
@@ -87,17 +93,31 @@ public class OperationsService {
     public MapDtoResponse map(MapFilter filter) {
         Limit limit = Limit.of(MARKER_LIMIT + 1);
         Set<AgentStatus> agentStatuses = filter.agentStatus() != null ? Set.of(filter.agentStatus()) : ACTIVE_AGENTS;
+        String neighborhood = normalize(filter.neighborhood());
 
         List<EquipmentMarkerView> equipments = equipmentRepository.findMarkers(filter.equipmentType(),
-                filter.equipmentStatus(), filter.region(), filter.agency(), limit);
+                filter.equipmentStatus(), filter.region(), filter.agency(), neighborhood, limit);
         List<AgentMarkerView> agents = agentRepository.findMarkers(agentStatuses, filter.region(), filter.agency(),
-                limit);
+                neighborhood, limit);
 
         boolean truncated = equipments.size() > MARKER_LIMIT || agents.size() > MARKER_LIMIT;
         return new MapDtoResponse(
                 equipments.stream().limit(MARKER_LIMIT).map(EquipmentMarkerDto::new).toList(),
                 agents.stream().limit(MARKER_LIMIT).map(AgentMarkerDto::new).toList(),
                 truncated);
+    }
+
+    /** Bairros que existem nos dados (equipamentos e bases de agentes), para o filtro do mapa não ser no escuro. */
+    @Transactional(readOnly = true)
+    public List<String> neighborhoods() {
+        Set<String> all = new TreeSet<>(equipmentRepository.findNeighborhoods());
+        all.addAll(agentRepository.findBaseNeighborhoods());
+        return List.copyOf(all);
+    }
+
+    /** O bairro é comparado sem diferenciar maiúsculas, como no filtro da lista de equipamentos. */
+    private static String normalize(String neighborhood) {
+        return neighborhood == null || neighborhood.isBlank() ? null : neighborhood.trim().toLowerCase(Locale.ROOT);
     }
 
     private static <E extends Enum<E>> Map<E, Long> zeros(Class<E> type) {

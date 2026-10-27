@@ -32,6 +32,7 @@ const SUMMARY = {
     byStatus: { NOT_INSTALLED: 0, OPERATIONAL: 30, MALFUNCTION: 7, UNDER_MAINTENANCE: 1, DEACTIVATED: 1, STOLEN: 1 },
     immediateMaintenance: 3,
     overdueMaintenance: 5,
+    upcomingMaintenance: 2,
   },
   agents: { total: 9, active: 4, byStatus: { AVAILABLE: 3, ON_OCCURRENCE: 1, OFF_DUTY: 3, ON_LEAVE: 2 } },
   regions: [{ region: 'NORTH', equipmentsInMalfunction: 2, activeAgents: 0 }],
@@ -41,6 +42,7 @@ const SUMMARY = {
 const ALERTS = [
   { kind: 'EQUIPMENT_MALFUNCTION', severity: 'HIGH', message: 'Radar RAD-1 com falha', region: 'NORTH', equipmentId: 'e1', equipmentType: 'RADAR', since: null },
   { kind: 'REGION_WITHOUT_ACTIVE_AGENT', severity: 'MEDIUM', message: 'Região Norte sem agente ativo', region: 'NORTH', equipmentId: null, equipmentType: null, since: null },
+  { kind: 'MAINTENANCE_DUE_SOON', severity: 'LOW', message: 'Manutenção do equipamento CAN-9 prevista para 30/10/2026.', region: 'WEST', equipmentId: 'e9', equipmentType: 'AUTOMATED_GATE', since: null },
 ]
 
 function alertsPage(content: unknown[]) {
@@ -56,6 +58,7 @@ function stubApi({ map = () => json(MAP), alerts = () => json(alertsPage(ALERTS)
     if (url.startsWith('/api/operations/map')) return map()
     if (url === '/api/operations/summary') return json(SUMMARY)
     if (url.startsWith('/api/operations/alerts')) return alerts()
+    if (url === '/api/operations/neighborhoods') return json(['Centro', 'Vila Marcondes'])
     throw new Error(`fetch inesperado: ${url}`)
   })
   vi.stubGlobal('fetch', mock)
@@ -98,6 +101,16 @@ describe('OperationsPage', () => {
     expect(cards.getByText('Manutenção imediata').parentElement?.textContent).toContain('3')
     expect(cards.getByText('Manutenção atrasada').parentElement?.textContent).toContain('5')
     expect(cards.getByText('Agentes em atividade').parentElement?.textContent).toContain('4')
+    expect(cards.getByText('Equipamentos').parentElement?.textContent).toContain('40')
+    expect(cards.getByText('Operacionais').parentElement?.textContent).toContain('30')
+    // indisponíveis = com falha + em manutenção + roubados
+    expect(cards.getByText('Indisponíveis').parentElement?.textContent).toContain('9')
+    // 30 operacionais de 39 em uso (fora desativados e não instalados)
+    expect(cards.getByText('Disponibilidade').parentElement?.textContent).toContain('77%')
+    expect(cards.getByText('Manutenção nos próximos 7 dias').parentElement?.textContent).toContain('2')
+    const lowAlert = screen.getByRole('link', { name: 'Manutenção do equipamento CAN-9 prevista para 30/10/2026.' })
+    expect(lowAlert.getAttribute('href')).toBe('/equipamentos/e9')
+    expect(lowAlert.closest('li')?.textContent).toContain('Baixa')
     expect(screen.getByRole('link', { name: 'Radar RAD-1 com falha' }).getAttribute('href')).toBe('/equipamentos/e1')
     expect(screen.getByRole('link', { name: 'Região Norte sem agente ativo' }).getAttribute('href')).toBe('/agentes?region=NORTH')
   })
@@ -112,6 +125,18 @@ describe('OperationsPage', () => {
     expect(url).toContain('equipmentStatus=MALFUNCTION')
     expect(url).toContain('region=NORTH')
     expect((screen.getByLabelText('Região') as HTMLSelectElement).value).toBe('NORTH')
+  })
+
+  it('deveEnviarBairroAoMapaEOferecerBairrosConhecidosQuandoFiltra', async () => {
+    const fetchMock = stubApi()
+
+    renderPage('/central?neighborhood=Vila+Marcondes')
+
+    await screen.findByText(/^mapa:/)
+    expect(mapUrls(fetchMock)[0]).toContain('neighborhood=Vila+Marcondes')
+    const select = screen.getByLabelText('Bairro') as HTMLSelectElement
+    await within(select).findByRole('option', { name: 'Centro' })
+    expect(select.value).toBe('Vila Marcondes')
   })
 
   it('deveEsconderCamadaSemNovaBuscaQuandoDesmarcaAgentes', async () => {

@@ -14,6 +14,7 @@ export type OperationsFilterValues = {
   agentStatus?: string
   region?: string
   agency?: string
+  neighborhood?: string
   /** Camadas desligadas; ficam na URL como `hide=equipments` / `hide=agents`. */
   hideEquipments: boolean
   hideAgents: boolean
@@ -21,6 +22,8 @@ export type OperationsFilterValues = {
 
 type Props = {
   values: OperationsFilterValues
+  /** Bairros conhecidos; vazio enquanto não chegam (o filtro já vindo da URL continua visível). */
+  neighborhoods: string[]
   onChange: (values: OperationsFilterValues) => void
 }
 
@@ -35,9 +38,13 @@ const SELECTS: { key: SelectKey; label: string; empty: string; options: readonly
   { key: 'agency', label: 'Órgão', empty: 'Todos', options: AGENCIES, labels: AGENCY_LABEL },
 ]
 
-export default function OperationsFilters({ values, onChange }: Props) {
+export default function OperationsFilters({ values, neighborhoods, onChange }: Props) {
   const hasFilters =
-    SELECTS.some(({ key }) => values[key]) || values.hideEquipments || values.hideAgents
+    SELECTS.some(({ key }) => values[key]) || values.neighborhood || values.hideEquipments || values.hideAgents
+  const neighborhoodOptions =
+    values.neighborhood && !neighborhoods.includes(values.neighborhood)
+      ? [values.neighborhood, ...neighborhoods]
+      : neighborhoods
 
   return (
     <form className="filters" onSubmit={(e) => e.preventDefault()} aria-label="Filtros do mapa">
@@ -73,6 +80,20 @@ export default function OperationsFilters({ values, onChange }: Props) {
           </select>
         </label>
       ))}
+      <label>
+        <span>Bairro</span>
+        <select
+          value={values.neighborhood ?? ''}
+          onChange={(e) => onChange({ ...values, neighborhood: e.target.value || undefined })}
+        >
+          <option value="">Todos</option>
+          {neighborhoodOptions.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </label>
       {hasFilters && (
         <button type="button" onClick={() => onChange({ hideEquipments: false, hideAgents: false })}>
           Limpar filtros

@@ -664,6 +664,7 @@ a {
 .summary-danger { border-left-color: #dc2626; }
 .summary-warning { border-left-color: #d97706; }
 .summary-info { border-left-color: #2563eb; }
+.summary-ok { border-left-color: #16a34a; }
 
 .filters-layers {
   display: flex;
@@ -816,6 +817,7 @@ a {
 
 .alert-high { border-left-color: #dc2626; }
 .alert-medium { border-left-color: #d97706; }
+.alert-low { border-left-color: #2563eb; }
 
 .alert-severity {
   font-size: 0.75rem;

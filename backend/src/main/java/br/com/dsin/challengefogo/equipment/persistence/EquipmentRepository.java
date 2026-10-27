@@ -42,6 +42,11 @@ public interface EquipmentRepository extends JpaRepository<EquipmentEntity, UUID
             + "and e.nextMaintenanceDate < :today and e.status <> EquipmentStatus.DEACTIVATED")
     long countOverdueMaintenance(LocalDate today);
 
+    /** Manutenção agendada que vence de hoje até {@code until}, em equipamento em uso: o que pede preparo já. */
+    @Query("select count(e) from EquipmentEntity e where e.maintenanceNeed = MaintenanceNeed.SCHEDULED "
+            + "and e.nextMaintenanceDate between :today and :until and e.status <> EquipmentStatus.DEACTIVATED")
+    long countUpcomingMaintenance(LocalDate today, LocalDate until);
+
     @Query("select new br.com.dsin.challengefogo.shared.persistence.RegionCount(e.location.region, count(e)) "
             + "from EquipmentEntity e where e.status = :status group by e.location.region")
     List<RegionCount> countByRegionWithStatus(EquipmentStatus status);
@@ -51,15 +56,23 @@ public interface EquipmentRepository extends JpaRepository<EquipmentEntity, UUID
             + "e.location.region) from EquipmentEntity e "
             + "where (:type is null or e.type = :type) and (:status is null or e.status = :status) "
             + "and (:region is null or e.location.region = :region) and (:agency is null or e.agency = :agency) "
+            + "and (:neighborhood is null or lower(e.location.neighborhood) = :neighborhood) "
             + "order by e.serialNumber")
     List<EquipmentMarkerView> findMarkers(EquipmentType type, EquipmentStatus status, Region region, Agency agency,
-                                          Limit limit);
+                                          String neighborhood, Limit limit);
 
-    /** Candidatos a alerta: com falha, roubados ou com manutenção atrasada (regras 3 e 5). */
+    @Query("select distinct e.location.neighborhood from EquipmentEntity e where e.location.neighborhood is not null")
+    List<String> findNeighborhoods();
+
+    /**
+     * Candidatos a alerta: com falha, roubados ou com manutenção agendada vencida ou vencendo até {@code until}
+     * (regras 3 e 5). A ordem pela data deixa as manutenções próximas da mais urgente para a menos.
+     */
     @Query("select new br.com.dsin.challengefogo.equipment.persistence.EquipmentAlertView(e.id, e.type, "
             + "e.serialNumber, e.status, e.maintenanceNeed, e.nextMaintenanceDate, e.location.region) "
             + "from EquipmentEntity e where e.status in (EquipmentStatus.MALFUNCTION, EquipmentStatus.STOLEN) "
-            + "or (e.maintenanceNeed = MaintenanceNeed.SCHEDULED and e.nextMaintenanceDate < :today "
-            + "and e.status <> EquipmentStatus.DEACTIVATED)")
-    List<EquipmentAlertView> findAlertCandidates(LocalDate today);
+            + "or (e.maintenanceNeed = MaintenanceNeed.SCHEDULED and e.nextMaintenanceDate <= :until "
+            + "and e.status <> EquipmentStatus.DEACTIVATED) "
+            + "order by e.nextMaintenanceDate nulls first, e.serialNumber")
+    List<EquipmentAlertView> findAlertCandidates(LocalDate until);
 }
