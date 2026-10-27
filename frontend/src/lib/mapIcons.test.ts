@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { AGENT_STATUSES } from './api/agents'
+import { AGENT_STATUSES, AGENT_TYPES } from './api/agents'
 import { EQUIPMENT_STATUSES, EQUIPMENT_TYPES } from './api/equipments'
-import { AGENT_STATUS_COLOR, EQUIPMENT_STATUS_COLOR, agentIcon, equipmentGlyph, equipmentIcon } from './mapIcons'
+import { AGENT_STATUS_COLOR, EQUIPMENT_STATUS_COLOR, agentGlyph, agentIcon, equipmentGlyph, equipmentIcon } from './mapIcons'
 
 describe('mapIcons', () => {
   it.each(EQUIPMENT_TYPES)('deveDevolverSimboloQuandoTipoE%s', (type) => {
@@ -37,8 +37,16 @@ describe('mapIcons', () => {
 
   it('deveUsarCorDaSituacaoQuandoCriaIconeDeAgente', () => {
     for (const status of AGENT_STATUSES) {
-      expect(String(agentIcon(status).options.html)).toContain(AGENT_STATUS_COLOR[status])
+      expect(String(agentIcon('TRAFFIC_AGENT', status).options.html)).toContain(AGENT_STATUS_COLOR[status])
     }
     expect(AGENT_STATUS_COLOR.AVAILABLE).not.toBe(AGENT_STATUS_COLOR.ON_OCCURRENCE)
+  })
+
+  it('deveUsarSimboloDiferentePorTipoQuandoCriaIconeDeAgente', () => {
+    const glyphs = AGENT_TYPES.map((type) => agentGlyph(type))
+    expect(new Set(glyphs).size).toBe(AGENT_TYPES.length)
+    for (const type of AGENT_TYPES) {
+      expect(String(agentIcon(type, 'AVAILABLE').options.html)).toContain(agentGlyph(type))
+    }
   })
 })

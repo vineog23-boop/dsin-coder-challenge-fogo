@@ -4,6 +4,13 @@ Inventário de equipamentos IoT de trânsito e segurança e dos agentes que atua
 
 Cada equipamento e cada agente guarda o **histórico** de cada mudança de situação e manutenção. Esse histórico alimenta o mapa da central (Parte 2) e as previsões (Parte 3).
 
+## Entrega
+
+- **Partes entregues:** 1 (inventário) e 2 (central de operações). A Parte 3 (previsão) não foi implementada; o histórico e o padrão plantado no seed já preparam os dados para ela.
+- **Vídeos** (pasta pública no Drive): https://drive.google.com/drive/folders/1BjLj-nyA8AZWNUFiZI9zt6eEtjR-Xa4_
+  - `video_apresentacao.mp4`: apresentação do projeto e das decisões.
+  - `fogo-demonstracao-legendado.mp4`: o sistema rodando, com legendas explicando cada passo.
+
 ## Como rodar
 
 Pré-requisito: Docker com Docker Compose.
@@ -38,7 +45,7 @@ Testes: `cd backend && ./mvnw test` (precisa de Docker, porque usa PostgreSQL re
 ## O que existe
 
 **Central de operações** (`/central`, Parte 2)
-- **Mapa da cidade:** os equipamentos têm um ícone por tipo e a borda na cor da situação; os agentes em atividade aparecem como círculo na cor da situação, na posição em campo ou, sem ela, na base. Clicar num marcador abre o resumo, com link para o detalhe.
+- **Mapa da cidade:** os equipamentos têm um ícone por tipo e a borda na cor da situação; os agentes em atividade aparecem como círculo na cor da situação, com um símbolo por tipo (🚦 agente de trânsito, 🛡️ guarda municipal, 👮 policial militar), na posição em campo ou, sem ela, na base. Clicar num marcador abre o resumo, com link para o detalhe.
 - **Indicadores:** total de equipamentos, operacionais, indisponíveis (com falha, em manutenção ou roubados), percentual de disponibilidade (operacionais sobre os em uso, sem desativados e não instalados), agentes em atividade, equipamentos com falha, manutenção imediata, manutenção atrasada e manutenção nos próximos 7 dias. Mais uma tabela por região (falhas × agentes).
 - **Alertas calculados na hora:** equipamento com falha ou roubado e região sem agente em atividade (alta), manutenção atrasada (média) e manutenção prevista para os próximos 7 dias (baixa), ordenados por severidade e antiguidade.
 - **Filtros:** camadas, tipo, situação, região, órgão e bairro (lista com os bairros existentes). Ficam na URL.
@@ -130,13 +137,13 @@ Com prazo curto e uma IA escrevendo boa parte do código, o maior risco é ela d
 
 - As specs, os planos e as decisões estão em `.specs/`; as regras dadas à IA, em `AGENTS.md` e `.claude/`.
 - O `git log` mostra a evolução em commits pequenos, um assunto por commit, na ordem do plano.
-- Os 243 testes (183 no back-end e 60 no front-end) são a evidência de que cada regra da spec foi implementada.
+- Os 244 testes (183 no back-end e 61 no front-end) são a evidência de que cada regra da spec foi implementada.
 - O material de apresentação (slides e roteiro do vídeo) também foi produzido com o Claude Code, usando a ferramenta Mira, fora deste repositório.
 
 ## Roteiro do vídeo (≈ 4 min)
 
 1. `docker compose up --build` e abrir http://localhost:3000.
-2. Entrar como **gestor**: a **Central** abre com o mapa, os indicadores e os alertas. Mostrar o popup de um marcador, filtrar por "Com falha", desligar a camada de agentes e apontar um agente andando (telemetria).
+2. Entrar como **gestor**: a **Central** abre com o mapa, os indicadores e os alertas. Mostrar o popup de um marcador, filtrar por "Com falha", desligar a camada de equipamentos e apontar um agente andando (telemetria).
 3. Em outra aba, mudar um equipamento para "Com falha" e voltar à central: em até 10 s o marcador fica vermelho, o indicador sobe e surge o alerta.
 4. Lista de equipamentos: filtrar Radar + Norte + "Com falha" e mostrar que a URL guarda a busca.
 5. **Novo equipamento:**

@@ -1,5 +1,5 @@
 import L from 'leaflet'
-import type { AgentStatus } from './api/agents'
+import type { AgentStatus, AgentType } from './api/agents'
 import type { EquipmentStatus, EquipmentType } from './api/equipments'
 
 /** Símbolo de cada tipo de equipamento no mapa (regra do front: ícone por tipo). */
@@ -64,10 +64,22 @@ export function equipmentIcon(type: EquipmentType, status: EquipmentStatus): L.D
   })
 }
 
-export function agentIcon(status: AgentStatus): L.DivIcon {
+/** Símbolo de cada tipo de agente: o órgão fica visível no mapa sem abrir o resumo. */
+export function agentGlyph(type: AgentType): string {
+  switch (type) {
+    case 'TRAFFIC_AGENT':
+      return '🚦'
+    case 'MUNICIPAL_GUARD':
+      return '🛡️'
+    case 'MILITARY_POLICE':
+      return '👮'
+  }
+}
+
+export function agentIcon(type: AgentType, status: AgentStatus): L.DivIcon {
   return L.divIcon({
     className: 'map-marker',
-    html: `<span class="marker-agent" style="background:${AGENT_STATUS_COLOR[status]}">👮</span>`,
+    html: `<span class="marker-agent" style="background:${AGENT_STATUS_COLOR[status]}">${agentGlyph(type)}</span>`,
     iconSize: [26, 26],
     iconAnchor: [13, 13],
     popupAnchor: [0, -12],

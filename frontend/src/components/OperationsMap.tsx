@@ -50,7 +50,7 @@ export default function OperationsMap({ equipments, agents }: Props) {
           <Marker
             key={agent.id}
             position={[agent.latitude, agent.longitude]}
-            icon={agentIcon(agent.status)}
+            icon={agentIcon(agent.agentType, agent.status)}
             title={`${agent.name}: ${AGENT_STATUS_LABEL[agent.status]}`}
             zIndexOffset={1000}
           >
